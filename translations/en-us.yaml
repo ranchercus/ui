@@ -1043,6 +1043,9 @@ cruPersistentVolumeClaim:
   storageClass:
     label: Storage Class
     prompt: Use the default class
+  secretRequired:
+    name: Secret Name
+    namespace: Secret Namespace
 
 cruVolumeClaimTemplate:
   title:
@@ -1074,7 +1077,7 @@ cruVolumeClaimTemplate:
 cruPrivateRegistry:
   title:
     label: Private Registries
-    detail: Add private registries to this cluster
+    detail: Configure a default private registry for this cluster. When enabled, all images required for cluster provisioning and system add-ons startup will be pulled from this registry.
   noData: This cluster does not have any private registries defined
   defaultError: You must designate one private registry as the default
   add:
@@ -1087,7 +1090,7 @@ cruPrivateRegistry:
     url:
       label: URL
     default:
-      label: Default Registry
+      label: System Default Registry
 
 cruVolume:
   sourcePrompt: Choose a Volume Source above...
@@ -1184,9 +1187,25 @@ globalDnsPage:
       apiKey:
         label: API Key
         placeholder: Your API Key
+      credentialsPath:
+        label: Credential Path
+        placeholder: "/.aws"
+      proxySetting:
+        label: Proxy Setting
+      roleArn:
+        label: Role ARN
+        placeholder: "arn:partition:service:region:account-id:resource"
+      region:
+        label: Region
+        placeholder: us-west-2
+      zone:
+        label: Zone
+        placeholder: public
 
 multiClusterAppsPage:
   header: Multi-Cluster Apps
+  error:
+    appData: Error loading global app data
 
 # If you change translations here also change the translation in app/utils/constants.js under the FALLBACK_TRANSLATIONS key
 # those are present in case we have an error in the app and can not load the translations file
@@ -1387,6 +1406,9 @@ loginPage:
   error:
     authFailedCreds: "Logging in failed: Check credentials, or your account may not be authorized to log in."
     authFailed: "Logging in failed: Your account may not be authorized to log in."
+    unknown: "An unknown error occured while attempting to login. Please contact your system administrator."
+    invalidSamlAttrs: "Invalid saml attributes"
+    noResponse: "No response received"
   readableProviders:
     ad: Active Directory
     azureAd: Azure AD
@@ -1761,6 +1783,9 @@ notifierPage:
     agentPlaceholder: e.g. 1000003
     corpPlaceholder: e.g. wwc0cc3d58f9b021b6
     defaultRecipientPlaceholder: e.g. 2
+  proxyUrl:
+    label: Proxy URL
+    placeholder: e.g. http://my-proxy/
 
   webhook:
     url: URL
@@ -2491,6 +2516,8 @@ clusterNew:
     nodeCount:
       label: Node Count
       prompt: Choose a Type...
+      required: Node Count is required
+      outsideError: "The specified number of nodes in the node pool is outside the specified autoscaling limits"
     diskSizeGb:
       label: Root Disk Size
     masterVersion:
@@ -2802,7 +2829,7 @@ clusterNew:
       enabled:
         label: Recurring etcd Snapshot Enabled
       backupConfig:
-        legacy: "This cluster was configured with a legacy ectd snapshot api. The new api replaces the creation time and retention time durations with a simpler creation time in hours and retention count. We have migrated your creation period automatically. Retention count has been configured to the default of 6 snapshots (current retention duration: {duration}), if you're okay with this setting no further action is required. If not, you may change the setting in the advanced settings section."
+        legacy: "This cluster was configured with a legacy etcd snapshot api. The new api replaces the creation time and retention time durations with a simpler creation time in hours and retention count. We have migrated your creation period automatically. Retention count has been configured to the default of 6 snapshots (current retention duration: {duration}), if you're okay with this setting no further action is required. If not, you may change the setting in the advanced settings section."
         retention:
           label: Recurring etcd Snapshot Retention Count
           placeholder: "12"
@@ -2818,6 +2845,9 @@ clusterNew:
         endpoint:
           label: S3 Region Endpoint
           placeholder: "s3.us-west-2.amazonaws.com"
+        customCa:
+          label: Custom CA Certificate
+          placeholder: "Paste in the certificate and any necessary chain certificates, starting with -----BEGIN CERTIFICATE-----"
         accessKey:
           label: S3 Access Key
           placeholder: Your AWS access key
@@ -2902,7 +2932,7 @@ clusterNew:
       detail: Configure the networking for the cluster
       label: Network Provider
       flannel: Flannel
-      flannelCustom: Flannel (Windows Support Available)
+      flannelCustom: Flannel
       calico: Calico
       canal: Canal (Network Isolation Available)
       weave: Weave
@@ -3362,6 +3392,14 @@ cruPersistentVolume:
     volumeID:
       label: Volume ID
       placeholder: "e.g. vol"
+    secretRef:
+      name:
+        label: Secret Name
+        placeholder: "e.g. abc"
+      namespace:
+        label: Secret Namespace
+        placeholder: "e.g. default"
+      label: Secret Name
   photonPersistentDisk:
     fsType:
       label: Filesystem Type
@@ -3460,6 +3498,7 @@ cruPersistentVolume:
     volumePath:
       label: Volume Path
       placeholder: "e.g. /"
+
 cruStorageClass:
   name:
     placeholder: e.g. storage
@@ -3555,7 +3594,6 @@ cruStorageClass:
       placeholder: "e.g. 20"
   azure-disk:
     new: New Azure Disk
-    unmanaged: Azure Unmanaged Disk
     skuName:
       label: Sku Name
       placeholder: "e.g. Standard_LRS"
@@ -3570,8 +3608,8 @@ cruStorageClass:
       placeholder: "e.g. Standard_LRS"
     kind:
       label: Kind
-      shared: Shared
-      dedicated: Dedicated
+      shared: Shared (unmanaged disk)
+      dedicated: Dedicated (unmanaged disk)
       managed: Managed
       placeholder: "e.g. Shared"
   azure-file:
@@ -3825,6 +3863,7 @@ editApiKey:
   scope: Scope
   scopeSelect:
     prompt: no scope
+    helpText: 'Cluster-scoped tokens can be used to interact directly with the Kubernetes API of clusters configured with an <a href="https://rancher.com/docs/rancher/v2.x/en/cluster-provisioning/rke-clusters/options/#authorized-cluster-endpoint" target="_blank" rel="nofollow noreferrer">Authorized Cluster Endpoint</a>'
   ttl:
     label: Automatically Expire
     never: Never
@@ -5417,7 +5456,7 @@ modalAddCloudKey:
   saving:
     validating: Validating Keys
   errors:
-    validation: '{ status }: There was a problem validating your keys. Enter valid credentials and try agian.'
+    validation: '{ status }: There was a problem validating your keys. Enter valid credentials and try again.'
     region: You must select a region in order to validate your keys
   typeSelect:
     prompt: Choose a cloud credential provider type
@@ -5445,6 +5484,11 @@ modalAddCloudKey:
   vmwarevsphere:
     password:
       label: Password
+
+modalConfirmYaml2Form:
+  header: "You are about to switch from yaml to form based editing"
+  helpText: "Data loss may occur when switching back to form based editing. The following fields have been identified as fields that will be lost. Please note this list is not all-inclusive, you should verify your answers before saving the application. Please make sure you intended to switch or that you are okay losing the data before selecting confirm."
+  confirm: Confirm
 
 modalContainerStop:
   header: "Are you sure you want to stop"
@@ -5602,6 +5646,9 @@ modalRotateCertificates:
   dropdownLabel: Services
   select:
     all: Select a service
+  expiring:
+    until: '{ cert } (expires { expiresIn })'
+    from: '{ cert } (expired { expiresIn })'
 
 modalRollbackService:
   title: 'Rollback "{instanceName}"'
@@ -5713,6 +5760,7 @@ newCatalog:
   forceUpgrade: Delete and recreate resources if needed during the upgrade
   forceRollback: Delete and recreate resources if needed during the rollback
   templateFiles: Template Files
+  requiredNamespace: Required Namespace
   seeMore: More information...
   saveConfigure: Configure
   saveNew: Launch
@@ -5733,6 +5781,8 @@ newCatalog:
   version:
     prompt: Choose a version...
     default: The default at the time (currently {version})
+  error:
+    appData: Error loading app data
 
 newMultiClusterApp:
   answers:
@@ -5927,7 +5977,7 @@ clusterDrivers:
 kontainerDriver:
   displayName:
     aliyunkubernetescontainerservice: Alibaba ACK
-    amazonElasticContainerService: Amazon ECS
+    amazonElasticContainerService: Amazon EKS
     azureKubernetesService: Azure AKS
     googleKubernetesEngine: Google GKE
     huaweicontainercloudengine: Huawei CCE
@@ -6892,6 +6942,10 @@ tooltipWarning:
   notConfigured: Access Control Not Configured
   dismiss: Dismiss
 
+tooltipExpire:
+  label: 'This cluster has certs that are expiring or have expired.'
+  link: 'Roatate Now'
+
 upgradeBtn:
   version:
     current: 'Current'
@@ -6902,7 +6956,7 @@ upgradeBtn:
     available: 'Upgrade available'
     inprogress: 'Upgrade in progress'
     upgraded: 'Upgraded: Finish Upgrade'
-    notfound: 'Template version not found'
+    notfound: 'Catalog Template not found'
     error: 'Error checking for upgrade'
     required: 'Upgrade required'
 

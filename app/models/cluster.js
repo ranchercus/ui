@@ -1,4 +1,5 @@
-import { get, set, computed } from '@ember/object';
+import { get, set, computed, observer } from '@ember/object';
+import { on } from '@ember/object/evented';
 import { inject as service } from '@ember/service';
 import Resource from '@rancher/ember-api-store/models/resource';
 import { hasMany } from '@rancher/ember-api-store/utils/denormalize';
@@ -8,25 +9,43 @@ import { equal, alias } from '@ember/object/computed';
 import { resolve } from 'rsvp';
 import C from 'ui/utils/constants';
 import { isEmpty } from '@ember/utils';
+import moment from 'moment';
 
 export default Resource.extend(Grafana, ResourceUsage, {
   globalStore: service(),
   growl:       service(),
-  scope:       service(),
-  router:      service(),
   intl:        service(),
+  router:      service(),
+  scope:       service(),
 
-  namespaces:                  hasMany('id', 'namespace', 'clusterId'),
-  projects:                    hasMany('id', 'project', 'clusterId'),
-  nodes:                       hasMany('id', 'node', 'clusterId'),
-  nodePools:                   hasMany('id', 'nodePool', 'clusterId'),
   clusterRoleTemplateBindings: hasMany('id', 'clusterRoleTemplateBinding', 'clusterId'),
   etcdbackups:                 hasMany('id', 'etcdbackup', 'clusterId'),
+  namespaces:                  hasMany('id', 'namespace', 'clusterId'),
+  nodePools:                   hasMany('id', 'nodePool', 'clusterId'),
+  nodes:                       hasMany('id', 'node', 'clusterId'),
+  projects:                    hasMany('id', 'project', 'clusterId'),
+  expiringCerts:               null,
   grafanaDashboardName:        'Cluster',
+  isMonitoringReady:           false,
   machines:                    alias('nodes'),
   roleTemplateBindings:        alias('clusterRoleTemplateBindings'),
-  isGKE:                       equal('driver', 'googleKubernetesEngine'),
   isAKS:                       equal('driver', 'azureKubernetesService'),
+  isGKE:                       equal('driver', 'googleKubernetesEngine'),
+
+  conditionsDidChange:        on('init', observer('enableClusterMonitoring', 'conditions.@each.status', function() {
+    if ( !get(this, 'enableClusterMonitoring') ) {
+      return false;
+    }
+    const conditions = get(this, 'conditions') || [];
+
+    const ready = conditions.findBy('type', 'MonitoringEnabled');
+
+    const status = ready && get(ready, 'status') === 'True';
+
+    if ( status !== get(this, 'isMonitoringReady') ) {
+      set(this, 'isMonitoringReady', status);
+    }
+  })),
 
   getAltActionDelete: computed('action.remove', function() { // eslint-disable-line
     return get(this, 'canBulkRemove') ? 'delete' : null;
@@ -60,17 +79,6 @@ export default Resource.extend(Grafana, ResourceUsage, {
     }
 
     return null;
-  }),
-
-  isMonitoringReady: computed('conditions.@each.status', function() {
-    if ( !get(this, 'enableClusterMonitoring') ) {
-      return false;
-    }
-    const conditions = get(this, 'conditions') || [];
-
-    const ready = conditions.findBy('type', 'MonitoringEnabled');
-
-    return ready && get(ready, 'status') === 'True';
   }),
 
   isReady: computed('conditions.@each.status', function() {
@@ -138,7 +146,7 @@ export default Resource.extend(Grafana, ResourceUsage, {
     case 'rancherKubernetesEngineConfig':
       if ( !!pools ) {
         if ( firstPool ) {
-          return get(firstPool, 'displayProvider');
+          return get(firstPool, 'displayProvider') ? get(firstPool, 'displayProvider') : intl.t('clusterNew.rke.shortLabel');
         } else {
           return intl.t('clusterNew.rke.shortLabel');
         }
@@ -177,6 +185,38 @@ export default Resource.extend(Grafana, ResourceUsage, {
     out = projects.objectAt(0);
 
     return out;
+  }),
+
+  certsExpiring: computed('certificatesExpiration', function() {
+    let { certificatesExpiration = {}, expiringCerts } = this;
+
+    if (!expiringCerts) {
+      expiringCerts = [];
+    }
+
+    if (!isEmpty(certificatesExpiration)) {
+      let expKeys = Object.keys(certificatesExpiration);
+
+      expKeys.forEach((kee) => {
+        let certDate  = get(certificatesExpiration[kee], 'expirationDate');
+        const expirey = moment(certDate);
+        let diff      = expirey.diff(moment());
+
+        if (diff < 2592000000) { // milliseconds in a month
+          expiringCerts.pushObject({
+            expiringCertName: kee,
+            milliUntil:       diff,
+            exactDateTime:    certDate
+          });
+        }
+      });
+
+      set(this, 'expiringCerts', expiringCerts);
+
+      return expiringCerts.length > 0;
+    }
+
+    return false;
   }),
 
   availableActions: computed('actionLinks.{rotateCertificates}', function() {
@@ -249,7 +289,9 @@ export default Resource.extend(Grafana, ResourceUsage, {
     },
 
     edit() {
-      get(this, 'router').transitionTo('authenticated.cluster.edit', get(this, 'id'), { queryParams: { provider: get(this, 'driver') } });
+      let provider = get(this, 'provider') || get(this, 'driver');
+
+      get(this, 'router').transitionTo('authenticated.cluster.edit', get(this, 'id'), { queryParams: { provider } });
     },
 
     scaleDownPool(id) {

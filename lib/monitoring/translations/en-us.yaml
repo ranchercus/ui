@@ -76,6 +76,7 @@ clusterDashboard:
     reserved: "{used} of {total} Reserved"
     used: "{used} of {total} Used"
   enalbeMonitoring: Enable Monitoring to see live metrics
+  upgradeAvailable: "Monitoring {version} Upgrade Available"
   monitoringNotReady: Monitoring API is not ready
   node: Nodes
   etcd: Etcd
@@ -89,6 +90,12 @@ clusterDashboard:
 
 monitoringPage:
   update: Update configuration
+  version: Monitoring Version
+  upgrade: Upgrade monitoring to the latest version {version}
+  upgradeAvailable: "({version} Upgrade Available)"
+  confirmDisable: "Are you sure?  Click again to really disable monitoring."
+  disable: Disable Monitoring
+  enableActionLabel: Enable Monitoring
   toUpdate:
     cluster: Cluster level monitoring is enabled.
     project: Project level monitoring is enabled.
@@ -147,6 +154,10 @@ monitoringPage:
       label: Data Retention
     storageClass:
       label: Storage Class
+    operator:
+      memoryLimit:
+        label: Prometheus Operator Memory Limit
+        placeholder: e.g. 500
     nodeexporter:
       label: Node Exporter Host Port
       enable: Enable Node Exporter

@@ -99,31 +99,6 @@
               disabled=isEdit
             }}
           </div>
-          {{#if (and isCustom (eq mode "new"))}}
-            <div class="col span-4">
-              <label class="acc-label">{{t "clusterNew.rke.windowsSupport.label"}}</label>
-              <div class="radio">
-                <label class={{if (not-eq cluster.rancherKubernetesEngineConfig.network.plugin "flannel") "text-muted"}}>
-                  {{radio-button
-                    selection=windowsSupport
-                    value=true
-                    disabled=(not-eq cluster.rancherKubernetesEngineConfig.network.plugin "flannel")
-                  }}
-                  {{t "generic.enabled"}}
-                </label>
-              </div>
-              <div class="radio">
-                <label class={{if (not-eq cluster.rancherKubernetesEngineConfig.network.plugin "flannel") "text-muted"}}>
-                  {{radio-button
-                    selection=windowsSupport
-                    value=false
-                    disabled=(not-eq cluster.rancherKubernetesEngineConfig.network.plugin "flannel")
-                  }}
-                  {{t "generic.disabled"}}
-                </label>
-              </div>
-            </div>
-          {{/if}}
           <div class="col {{if (and isCustom (eq mode "new")) "span-4" "span-6"}}">
             <label class="acc-label">{{t "clusterNew.rke.networkPolicy.label"}}</label>
             <div class="radio">
@@ -153,6 +128,8 @@
             {{cru-cloud-provider
               cluster=model.cluster
               driver=nodeWhich
+              setCpFields=(action "setCpFields")
+              mode=mode
             }}
           </div>
         </div>
@@ -168,6 +145,8 @@
         }}
           {{cru-private-registry
             cluster=cluster
+            addRegistry=(action "addRegistry")
+            removeRegistry=(action "removeRegistry")
           }}
         {{/accordion-list-item}}
 
@@ -341,7 +320,7 @@
 
           </div>
           <div class="row">
-            <div class="col span-6">
+            <div class="col span-12">
 
               <label class="acc-label">{{t "clusterNew.rke.etcd.location.label"}}</label>
               <div>
@@ -399,7 +378,6 @@
             </div>
 
             <div class="row">
-
               <div class="col span-3">
                 <label class="acc-label">{{t "clusterNew.rke.etcd.backupConfig.accessKey.label"}}</label>
                 {{input
@@ -421,7 +399,24 @@
                   value=cluster.rancherKubernetesEngineConfig.services.etcd.backupConfig.s3BackupConfig.secretKey
                 }}
               </div>
-
+            </div>
+            <div class="row">
+              <div class="col span-7">
+                <label class="acc-label" for="s3-config-custom-ca">
+                  {{t "clusterNew.rke.etcd.backupConfig.customCa.label"}}
+                </label>
+                {{input-text-file
+                  accept="application/x-x509-ca-cert,text/plain,.pem,.crt"
+                  canChangeName=false
+                  classNames="box"
+                  id="s3-config-custom-ca"
+                  minHeight=60
+                  multiple=true
+                  placeholder="clusterNew.rke.etcd.backupConfig.customCa.placeholder"
+                  shouldChangeName=false
+                  value=cluster.rancherKubernetesEngineConfig.services.etcd.backupConfig.s3BackupConfig.customCa
+                }}
+              </div>
             </div>
           {{/unless}}
 
@@ -481,34 +476,6 @@
 
 {{#if (and isCustom (eq step 2)) }}
   {{#accordion-list showExpandAll=false as |al expandFn|}}
-    {{#if windowsSupport}}
-      {{#accordion-list-item
-         title=(t "clusterNew.rke.system.title")
-         detail=(t "clusterNew.rke.system.detail")
-         expandOnInit=true
-         expandAll=al.expandAll
-         expand=(action expandFn)
-      }}
-        <div class="row">
-          <div class="col span-6 text-center mt-0 mb-0">
-            <div class="radio">
-              <label>
-                {{radio-button selection=isLinux value=true}}
-                {{t "clusterNew.rke.system.linux"}}
-              </label>
-            </div>
-          </div>
-          <div class="col span-6 text-center mt-0 mb-0">
-            <div class="radio">
-              <label>
-                {{radio-button selection=isLinux value=false}}
-                {{t "clusterNew.rke.system.windows"}}
-              </label>
-            </div>
-          </div>
-        </div>
-      {{/accordion-list-item}}
-    {{/if}}
     {{#accordion-list-item
        title=(t "clusterNew.rke.role.pageheader")
        detail=(t "clusterNew.rke.info.text")
