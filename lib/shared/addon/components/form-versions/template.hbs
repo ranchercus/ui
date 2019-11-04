@@ -1,5 +1,10 @@
-{{new-select
+{{#if (eq mode "view")}}
+  {{value}}
+{{else}}
+  {{new-select
+    classNames="form-control"
     content=versionChoices
     value=value
     disabled=disabled
-}}
+  }}
+{{/if}}

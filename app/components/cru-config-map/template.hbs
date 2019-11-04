@@ -2,7 +2,12 @@
   {{#if isView}}
     <div class="right-buttons pull-right">
       {{badge-state model=model}}
-      {{action-menu model=model showPrimary=false classNames="ml-10 inline-block" size="sm"}}
+      {{action-menu
+        model=model
+        showPrimary=false
+        classNames="ml-10 inline-block"
+        size="sm"
+      }}
     </div>
   {{/if}}
 
@@ -10,7 +15,10 @@
 </section>
 
 {{#if (and isView model.description)}}
-  {{banner-message color='bg-secondary mb-0 mt-10' message=(linkify model.description)}}
+  {{banner-message
+    color="bg-secondary mb-0 mt-10"
+    message=(linkify model.description)
+  }}
 {{/if}}
 
 <div class="row">
@@ -19,8 +27,8 @@
       {{form-name-description
         nameDisabled=isEdit
         model=primaryResource
-        rowClass=''
-        colClass=''
+        rowClass=""
+        colClass=""
         nameRequired=(not isEdit)
         namePlaceholder="newConfigMap.name.placeholder"
         descriptionPlaceholder="newConfigMap.description.placeholder"
@@ -37,11 +45,11 @@
   </div>
 </div>
 
-<div class="box mt-10">
+<div class="box mt-10 mb-20">
   {{form-key-value
     initialMap=primaryResource.data
     allowEmptyValue=true
-    header=(t 'newConfigMap.values.label')
+    header=(t "newConfigMap.values.label")
     allowUpload=true
     addActionLabel="newConfigMap.addActionLabel"
     addInitialEmptyRow=true
@@ -50,7 +58,21 @@
   }}
 </div>
 
+{{#accordion-list showExpandAll=false as | al expandFn |}}
+  {{#if isView}}
+    {{form-related-workloads
+      workloads=model.workloads
+      expandAll=al.expandAll
+      expandFn=expandFn
+    }}
+  {{/if}}
+{{/accordion-list}}
+
 {{#unless isView}}
   {{top-errors errors=errors}}
-  {{save-cancel editing=true save="save" cancel="viewEditCancel"}}
+  {{save-cancel
+    editing=true
+    save=(action "save")
+    cancel=(action "viewEditCancel")
+  }}
 {{/unless}}

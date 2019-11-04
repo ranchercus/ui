@@ -1,7 +1,7 @@
 // Forms
 // Placeholder text color
 $label-color                    : $dark-grey !default;
-$input-color-placeholder        : lighten($mid-grey, 5) !default;
+$input-color-placeholder        : lighten($mid-grey, 1) !default;
 $input-bg                       : lighten($light-grey, 5) !default;
 $input-bg-hover                 : $mid-grey !default;
 $input-bg-disabled              : $disabled  !default;
@@ -60,6 +60,17 @@ input[type='checkbox'] {
     width: 1.25em;
 }
 
+// Firefox fix to turn off the red box shadow on required fields
+input:required,
+textarea:required {
+  box-shadow: none !important;
+}
+
+// Firefox fix to turn off the red box shadow on invalid fields
+input:invalid {
+  box-shadow: initial;
+}
+
 input[type='text'],
 input[type='password'],
 input[type='number'],
@@ -88,14 +99,14 @@ textarea {
     }
 
     &::placeholder {
-        color: $input-color-placeholder;
+        color: rgba($input-color-placeholder, .8);
     }
 
     &:hover {
         border-color: $input-bg-hover;
         background: rgba($input-bg-hover, .2);
         &::placeholder {
-            color: $input-color-placeholder;
+          color: rgba($input-color-placeholder, .35);
         }
     }
     &.disabled, &[disabled], &[disabled]:hover  {
@@ -109,8 +120,9 @@ textarea {
     &:focus {
         background: rgba($input-border-focus, .2);
         border-color: $input-border-focus;
+        transition: ease-in-out all .25s;
         &::placeholder {
-            color: $input-color-placeholder;
+            color: rgba($input-color-placeholder, .5);
         }
     }
 }

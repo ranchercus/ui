@@ -17,8 +17,8 @@ var Principal = Resource.extend({
       .get('firstObject');
   }),
 
-  avatarSrc: computed('isGithub', 'id', 'profilePicture', function() {
-    if ( get(this, 'isGithub') && get(this, 'profilePicture') ) {
+  avatarSrc: computed('isGithub', 'isGoogleOauth', 'id', 'profilePicture', function() {
+    if ( (get(this, 'isGithub') && get(this, 'profilePicture')) || (get(this, 'isGoogleOauth') && get(this, 'profilePicture')) ) {
       return get(this, 'profilePicture');
     } else {
       let id = get(this, 'id') || 'Unknown';
@@ -34,6 +34,10 @@ var Principal = Resource.extend({
     return (get(this, 'provider') || '').toLowerCase() === 'github';
   }),
 
+  isGoogleOauth: computed('parsedExternalType', function() {
+    return (get(this, 'provider') || '').toLowerCase() === 'googleoauth';
+  }),
+
   logicalType: computed('parsedExternalType', function() {
     switch ( get(this, 'parsedExternalType') ) {
     case C.PROJECT.TYPE_ACTIVE_DIRECTORY_USER:
@@ -41,6 +45,7 @@ var Principal = Resource.extend({
     case C.PROJECT.TYPE_AZURE_USER:
     case C.PROJECT.TYPE_FREEIPA_USER:
     case C.PROJECT.TYPE_GITHUB_USER:
+    case C.PROJECT.TYPE_GOOGLE_USER:
     case C.PROJECT.TYPE_KEYCLOAK_USER:
     case C.PROJECT.TYPE_LDAP_USER:
     case C.PROJECT.TYPE_OPENLDAP_USER:
@@ -62,6 +67,7 @@ var Principal = Resource.extend({
     case C.PROJECT.TYPE_OPENLDAP_GROUP:
     case C.PROJECT.TYPE_PING_GROUP:
     case C.PROJECT.TYPE_SHIBBOLETH_GROUP:
+    case C.PROJECT.TYPE_GOOGLE_GROUP:
       return C.PROJECT.ORG;
     }
   }),
@@ -86,6 +92,7 @@ var Principal = Resource.extend({
     case C.PROJECT.TYPE_AZURE_USER:
     case C.PROJECT.TYPE_FREEIPA_USER:
     case C.PROJECT.TYPE_GITHUB_USER:
+    case C.PROJECT.TYPE_GOOGLE_USER:
     case C.PROJECT.TYPE_KEYCLOAK_USER:
     case C.PROJECT.TYPE_LDAP_USER:
     case C.PROJECT.TYPE_OPENLDAP_USER:
@@ -104,6 +111,7 @@ var Principal = Resource.extend({
     case C.PROJECT.TYPE_OPENLDAP_GROUP:
     case C.PROJECT.TYPE_PING_GROUP:
     case C.PROJECT.TYPE_SHIBBOLETH_GROUP:
+    case C.PROJECT.TYPE_GOOGLE_GROUP:
       key = 'model.identity.displayType.group';
       break;
 

@@ -64,7 +64,9 @@ export default Component.extend(NewOrEdit, {
       set(this, 'principal', principal);
     },
     cancel() {
-      this.sendAction('cancel');
+      if (this.cancel) {
+        this.cancel();
+      }
     },
     save(cb) {
       set(this, 'errors', null);
@@ -240,6 +242,11 @@ export default Component.extend(NewOrEdit, {
     },
     set(key, value) {
       if (typeof value === 'object') {
+        const ur = get(this, 'userRoles').findBy('active', true);
+
+        if ( ur ) {
+          set(ur, 'active', false);
+        }
         set(value, 'active', true);
         // value = get(value, 'role.id');
         // return get(value, 'role.id');

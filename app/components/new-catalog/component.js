@@ -26,7 +26,6 @@ export default Component.extend(NewOrEdit, CatalogApp, ChildHook, {
 
   layout,
   namespaceErrors:          null,
-  allTemplates:             null,
   templateResource:         null,
   namespaceResource:        null,
   versionsArray:            null,
@@ -38,6 +37,7 @@ export default Component.extend(NewOrEdit, CatalogApp, ChildHook, {
   customizeNamespace:       false,
   decoding:                 false,
   forceUpgrade:             false,
+  istio:                    false,
   titleAdd:                 'newCatalog.titleAdd',
   titleUpgrade:             'newCatalog.titleUpgrade',
   selectVersionAdd:         'newCatalog.selectVersionAdd',
@@ -123,7 +123,13 @@ export default Component.extend(NewOrEdit, CatalogApp, ChildHook, {
     },
 
     cancel() {
-      this.sendAction('cancel');
+      if ( get(this, 'istio') ) {
+        const projectId = get(this, 'scope.currentProject.id');
+
+        get(this, 'router').transitionTo('authenticated.project.istio.project-istio.rules', projectId);
+      } else if ( this.cancel ) {
+        this.cancel();
+      }
     },
 
     togglePreview() {
@@ -364,23 +370,25 @@ export default Component.extend(NewOrEdit, CatalogApp, ChildHook, {
       //   versionId = get(this, 'selectedTemplateModel.id');
       // }
 
-      // this.sendAction('doSave', {
-      //   answers:           get(this, 'answers'),
-      //   externalId:        get(this, 'newExternalId'),
-      //   templateId:        get(this, 'templateResource.id'),
-      //   templateVersionId: versionId,
-      // });
+      // if (this.doSave) {
+      //   this.doSave({
+      //     answers:           get(this, 'answers'),
+      //     externalId:        get(this, 'newExternalId'),
+      //     templateId:        get(this, 'templateResource.id'),
+      //     templateVersionId: versionId,
+      //   });
+      // }
       return false;
     }
   },
 
   didSave(neu) {
-    let app = get(this, 'catalogApp');
+    let app  = get(this, 'catalogApp');
     let yaml = get(this, 'selectedTemplateModel.valuesYaml');
 
     if ( !yaml && this.shouldFallBackToYaml() ) {
       const questions = get(this, 'selectedTemplateModel.allQuestions') || [];
-      const input = {};
+      const input     = {};
 
       questions.forEach((q) => {
         if ( q.answer !== undefined && q.answer !== null ) {
@@ -420,7 +428,11 @@ export default Component.extend(NewOrEdit, CatalogApp, ChildHook, {
   doneSaving() {
     var projectId = get(this, 'scope.currentProject.id');
 
-    return get(this, 'router').transitionTo('apps-tab.index', projectId);
+    if ( get(this, 'istio') ) {
+      return get(this, 'router').transitionTo('authenticated.project.istio.project-istio.rules', projectId);
+    } else {
+      return get(this, 'router').transitionTo('apps-tab.index', projectId);
+    }
   },
 
   shouldFallBackToYaml() {

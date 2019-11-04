@@ -5,11 +5,14 @@ import { next } from '@ember/runloop';
 import { inject as service } from '@ember/service';
 import Component from '@ember/component';
 import NewOrEdit from 'shared/mixins/new-or-edit';
-import { debouncedObserver } from 'ui/utils/debounce';
 import C from 'ui/utils/constants';
 import ChildHook from 'shared/mixins/child-hook';
-import { flattenLabelArrays } from 'shared/mixins/manage-labels';
 import layout from './template';
+
+const WINDOWS_NODE_SELECTOR = 'beta.kubernetes.io/os = windows';
+const LINUX_NODE_SELECTOR = 'beta.kubernetes.io/os != windows';
+const LINUX = 'linux';
+const WINDOWS = 'windows';
 
 export default Component.extend(NewOrEdit, ChildHook, {
   clusterStore: service(),
@@ -34,6 +37,7 @@ export default Component.extend(NewOrEdit, ChildHook, {
   isRequestedHost:       null,
   upgradeOptions:        null,
   separateLivenessCheck: false,
+  targetOs:              WINDOWS,
 
   // Errors from components
   commandErrors:    null,
@@ -52,10 +56,10 @@ export default Component.extend(NewOrEdit, ChildHook, {
   annotationErrors: null,
 
   // ----------------------------------
-  userLabels: null,
-
-  advanced:   false,
+  advanced:     false,
   header:        '',
+  showTargetOS: false,
+
   isSidekick:    equal('scaleMode', 'sidekick'),
   init() {
     window.nec = this;
@@ -67,9 +71,13 @@ export default Component.extend(NewOrEdit, ChildHook, {
 
     const service = get(this, 'service');
 
-    if (!get(this, 'isSidekick') &&
-      service && !get(service, 'scheduling')) {
-      set(service, 'scheduling', { node: {} });
+    const scheduling = get(service, 'scheduling')
+
+    if (!get(this, 'isSidekick') && !get(service, 'scheduling.node')) {
+      set(service, 'scheduling', {
+        ...scheduling,
+        node: {}
+      });
     }
 
     if (!get(this, 'isSidekick')) {
@@ -106,8 +114,8 @@ export default Component.extend(NewOrEdit, ChildHook, {
       }
     }
 
-    if ( !get(this, 'isSidekick') ) {
-      this.labelsChanged();
+    if ( get(this, 'showTargetOS') && get(this, `prefs.${ C.PREFS.TARGET_OS }`) ) {
+      set(this, 'targetOs', get(this, `prefs.${ C.PREFS.TARGET_OS }`));
     }
   },
 
@@ -120,12 +128,12 @@ export default Component.extend(NewOrEdit, ChildHook, {
   },
 
   actions: {
-    setImage(uuid) {
-      set(this, 'launchConfig.image', uuid);
+    setTargetOs(os) {
+      set(this, 'targetOs', os);
     },
 
-    setLabels(section, labels) {
-      set(this, `${ section  }Labels`, labels);
+    setImage(uuid) {
+      set(this, 'launchConfig.image', uuid);
     },
 
     setRequestedHostId(hostId) {
@@ -137,11 +145,15 @@ export default Component.extend(NewOrEdit, ChildHook, {
     },
 
     done() {
-      this.sendAction('done');
+      if (this.done) {
+        this.done();
+      }
     },
 
     cancel() {
-      this.sendAction('cancel');
+      if (this.cancel) {
+        this.cancel();
+      }
     },
 
     toggleSeparateLivenessCheck() {
@@ -154,18 +166,6 @@ export default Component.extend(NewOrEdit, ChildHook, {
       ary.removeAt(idx);
     },
   },
-
-  // Labels
-  labelsChanged: debouncedObserver(
-    'userLabels.@each.{key,value}',
-    function() {
-      let out = flattenLabelArrays(
-        get(this, 'userLabels'),
-      );
-
-      set(this, 'service.labels', out);
-    }
-  ),
 
   updateHeader: function() {
     let args = {};
@@ -264,6 +264,25 @@ export default Component.extend(NewOrEdit, ChildHook, {
     let service = get(this, 'service');
 
     let readinessProbe = get(lc, 'readinessProbe');
+
+    if ( get(this, 'showTargetOS') && ( get(this, 'targetOs') === LINUX || get(this, 'targetOs') === WINDOWS )  ) {
+      const selector = get(this, 'targetOs') === WINDOWS ? WINDOWS_NODE_SELECTOR : LINUX_NODE_SELECTOR;
+
+      if ( !get(service, 'scheduling') ) {
+        set(service, 'scheduling', { node: { requireAll: [selector] } });
+      } else if ( !get(service, 'scheduling.node') ) {
+        set(service, 'scheduling.node', { requireAll: [selector] });
+      } else if ( !get(service, 'scheduling.node.requireAll') ) {
+        set(service, 'scheduling.node.requireAll', [selector]);
+      } else {
+        const requireAll = get(service, 'scheduling.node.requireAll') || [];
+        const found = requireAll.find((r) => r && r.replace(/\s+/g, '') === selector.replace(/\s+/g, ''));
+
+        if ( !found ) {
+          requireAll.push(selector);
+        }
+      }
+    }
 
     if (!get(this, 'separateLivenessCheck')) {
       if ( readinessProbe ) {
@@ -400,8 +419,15 @@ export default Component.extend(NewOrEdit, ChildHook, {
       set(this, `prefs.${ C.PREFS.LAST_SCALE_MODE }`, scaleMode);
       set(this, `prefs.${ C.PREFS.LAST_IMAGE_PULL_POLICY }`, get(this, 'launchConfig.imagePullPolicy'));
       set(this, `prefs.${ C.PREFS.LAST_NAMESPACE }`, get(this, 'namespace.id'));
+
+
+      if ( get(this, 'showTargetOS') ) {
+        set(this, `prefs.${ C.PREFS.TARGET_OS }`, get(this, 'targetOs'));
+      }
     }
-    this.sendAction('done');
+    if (this.done) {
+      this.done();
+    }
   },
 
 });

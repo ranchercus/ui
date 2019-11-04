@@ -7,7 +7,6 @@ import { get, set } from '@ember/object';
 export default Route.extend({
   access:   service(),
   cookies:  service(),
-  github:   service(),
   language: service('user-language'),
   modal:    service(),
   prefs:    service(),
@@ -23,7 +22,6 @@ export default Route.extend({
   shortcuts: { 'shift+l': 'langToggle', },
 
   beforeModel() {
-    this._super(...arguments);
     this.updateWindowTitle();
 
     let agent = window.navigator.userAgent.toLowerCase();
@@ -143,6 +141,7 @@ export default Route.extend({
       access.clearToken().finally(() => {
         get(this, 'tab-session').clear();
         set(this, `session.${ C.SESSION.CONTAINER_ROUTE }`, undefined);
+        set(this, `session.${ C.SESSION.ISTIO_ROUTE }`, undefined);
         set(this, `session.${ C.SESSION.CLUSTER_ROUTE }`, undefined);
         set(this, `session.${ C.SESSION.PROJECT_ROUTE }`, undefined);
 

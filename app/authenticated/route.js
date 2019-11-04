@@ -49,6 +49,7 @@ export default Route.extend(Preload, {
     'w': 'gotow',
     'b': 'gotob',
     's': 'gotos',
+    'h': 'gotoh',
     'v': 'gotov',
     'a': 'gotoa',
 
@@ -62,22 +63,21 @@ export default Route.extend(Preload, {
   },
 
   beforeModel() {
-    this._super(...arguments);
-
     set(this, 'testTimer', later(() => {
       this.testAuthToken();
     }, CHECK_AUTH_TIMER));
 
-    return this.testAuthToken().then(() => {
+    return PromiseAll([
+      this.testAuthToken(),
+      this.loadPublicSettings(),
+    ]).then(() => {
       if (get(this, 'access.mustChangePassword')) {
         this.transitionTo('update-password');
       }
 
-      return this.loadPublicSettings().then(() => {
-        if (get(this, 'settings.serverUrlIsEmpty')) {
-          get(this, 'router').transitionTo('update-critical-settings');
-        }
-      });
+      if (get(this, 'settings.serverUrlIsEmpty')) {
+        get(this, 'router').transitionTo('update-critical-settings');
+      }
     });
   },
 
@@ -116,6 +116,7 @@ export default Route.extend(Preload, {
             this.preload('authConfig', 'globalStore', { url: 'authConfigs' }),
             this.preload('globalRoleBinding', 'globalStore', { url: 'globalRoleBinding' }),
             this.preload('user', 'globalStore', { url: 'user' }),
+            this.preload('features', 'globalStore', { url: 'features' }),
 
             globalStore.findAll('principal').then((principals) => {
               const me = principals.filter((p) => p.me === true);
@@ -319,6 +320,9 @@ export default Route.extend(Preload, {
     },
     gotos() {
       this._gotoRoute('authenticated.project.dns', 'project');
+    },
+    gotoh() {
+      this._gotoRoute('authenticated.project.hpa', 'project');
     },
     gotov() {
       this._gotoRoute('volumes', 'project');

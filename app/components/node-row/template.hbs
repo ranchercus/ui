@@ -62,13 +62,23 @@
           </span>
         </div>
       {{/if}}
+      {{#if (and model.osInfo scope.currentCluster.isWindows)}}
+        <div class="text-small text-muted">
+          <span>
+            <i class="icon icon-fw icon-{{model.osInfo}}"></i>
+            <span class="text-capitalize">
+              {{model.osInfo}}
+            </span>
+          </span>
+        </div>
+      {{/if}}
     {{else}}
       <span class="text-muted">
         {{t 'generic.na'}}
       </span>
     {{/if}}
   </td>
-  
+
   <td class="text-right" data-title="{{dt.cpu}}">
     {{#if model.cpuUsage}}
       {{model.cpuUsage}}
@@ -104,13 +114,13 @@
   </td>
 </tr>
 
-{{#if (or model.displayUserLabelStrings.length model.requireAnyLabelStrings.length model.isUnschedulable)}}
+{{#if (or model.displayUserLabelStrings.length model.displayTaintsStrings.length model.requireAnyLabelStrings.length)}}
   <tr class="sub-row">
     <td colspan="2">{{! checkbox and expand}}</td>
     <td colspan="{{sub labelColspan 3}}">
-      {{#if model.isUnschedulable}}
-        <span class="tag-xs bg-warning">{{t 'nodesPage.table.unschedulable'}}</span>
-      {{/if}}
+      {{#each model.displayTaintsStrings as |taint|}}
+        <span class="tag-xs bg-warning">{{taint}}</span>
+      {{/each}}
       {{#each model.requireAnyLabelStrings as |label|}}
         <span class="tag-xs bg-warning">{{label}}</span>
       {{/each}}

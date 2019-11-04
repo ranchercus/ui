@@ -33,6 +33,7 @@
             <option
               value={{backup.id}}
               selected={{eq backup.id value}}
+              disabled={{eq backup.state "activating"}}
             >
               {{backup.label}}
             </option>
@@ -45,7 +46,7 @@
 
 {{save-cancel
   editing=true
-  save="restore"
+  save=(action "restore")
   saveDisabled=(not backupId)
-  cancel="cancel"
+  cancel=(action "cancel")
 }}

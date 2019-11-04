@@ -24,7 +24,6 @@ const MultiClusterApp = Resource.extend({
     return get(this, 'externalIdInfo.templateId');
   }),
 
-
   canUpgrade: computed('actionLinks.{upgrade}', 'catalogTemplate', 'templateVersion', function() {
     const l = get(this, 'links') || {};
 
@@ -39,7 +38,7 @@ const MultiClusterApp = Resource.extend({
     return !isEmpty(this.catalogTemplate) && !!( this.actionLinks || {} ).rollback;
   }),
 
-  availableActions: computed('actionLinks.{rollback}', 'links.{update}', function() {
+  availableActions: computed('actionLinks.{rollback}', 'links.{update}', 'canUpgrade', 'canRollback', function() {
     return [
       {
         label:   'action.upgrade',

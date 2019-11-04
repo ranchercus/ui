@@ -1,12 +1,12 @@
 {{#outside-click onOutsideClick=(action "hide")}}
   {{input
     disabled=readOnly
-    class=(concat "form-control input-search search " class)
+    class=(concat "form-control input-search search " class " " inputClass)
     placeholder=placeholder
     type="text"
     autocomplete="off"
     value=filter
-    key-up="search"
+    key-up=(action "search")
   }}
 
   {{#if showOptions}}

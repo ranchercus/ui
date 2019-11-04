@@ -4,9 +4,11 @@ import { inject as service } from '@ember/service';
 import EmberObject, { get, set, computed } from '@ember/object';
 import layout from './template';
 import { getSources } from 'ui/models/volume';
+import C from 'ui/utils/constants';
 
 export default Component.extend(ViewNewEdit, {
-  intl: service(),
+  intl:        service(),
+  features:     service(),
 
   layout,
   model:      null,
@@ -69,6 +71,12 @@ export default Component.extend(ViewNewEdit, {
     return out.filter((x) => x.priority > 0 ).sortBy('priority', 'label');
   }),
 
+  supportedSourceChoices: computed('sourceChoices', function() {
+    const showUnsupported = get(this, 'features').isFeatureEnabled(C.FEATURES.UNSUPPORTED_STORAGE_DRIVERS);
+
+    return get(this, 'sourceChoices').filter((choice) => showUnsupported || choice.supported)
+  }),
+
   sourceComponent: computed('sourceName', function() {
     const name = get(this, 'sourceName');
     const sources = getSources('ephemeral');
@@ -103,15 +111,16 @@ export default Component.extend(ViewNewEdit, {
 
       set(out, entry.value, get(vol, entry.value));
 
-      this.sendAction('doSave', { volume: out, });
-      this.doneSaving();
+      if (this.doSave) {
+        this.doSave({ volume: out })
+      }
+
+      if (this.done) {
+        this.done();
+      }
     }
 
     return false;
-  },
-
-  doneSaving() {
-    this.sendAction('done');
   },
 
 });

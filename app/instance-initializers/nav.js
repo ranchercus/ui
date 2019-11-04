@@ -4,46 +4,65 @@ import { get } from '@ember/object';
 const rootNav = [
   // Project
   {
-    scope:           'project',
-    id:              'containers',
-    localizedLabel:  'nav.containers.tab',
-    route:           'authenticated.project.index',
-    ctx:             [getProjectId],
-    resource:        ['workload', 'ingress', 'service'],
-    resourceScope:   'project',
-    moreCurrentWhen: [
-      'containers', 'workload',
-      'ingresses',
-      'authenticated.project.dns',
-      'volumes',
-      'authenticated.project.pipeline.pipelines',
-      'authenticated.project.pipeline.repositories',
-    ],
-  },
-
-  {
-    scope:          'project',
-    id:             'project-apps',
-    localizedLabel: 'nav.apps.tab',
-    route:          'apps-tab',
-    ctx:            [getProjectId],
-    resource:       ['app'],
-    resourceScope:  'project',
-  },
-  {
     scope:          'project',
     id:             'infra',
     localizedLabel: 'nav.infra.tab',
     ctx:            [getProjectId],
-    route:          'authenticated.project.certificates',
     submenu:        [
       {
-        id:             'infra-certificates',
-        localizedLabel: 'nav.infra.certificates',
-        route:          'authenticated.project.certificates',
+        id:             'containers',
+        localizedLabel: 'nav.containers.tab',
+        route:          'authenticated.project.index',
         ctx:            [getProjectId],
-        resource:       ['certificate'],
+        resource:       ['workload', 'ingress', 'service'],
         resourceScope:  'project',
+        currentWhen:    [
+          'containers',
+          'workload',
+          'ingresses',
+          'authenticated.project.dns',
+          'volumes',
+        ],
+      },
+      {
+        id:             'hpa',
+        localizedLabel: 'nav.infra.hpa',
+        route:          'authenticated.project.hpa',
+        ctx:            [getProjectId],
+        resource:       ['horizontalpodautoscaler'],
+        resourceScope:  'project',
+      },
+      {
+        id:             'pipelines',
+        localizedLabel: 'nav.infra.pipelines',
+        route:          'authenticated.project.pipeline.pipelines',
+        ctx:            [getProjectId],
+        resource:       [],
+        resourceScope:  'project',
+      },
+      {
+        id:             'istio',
+        localizedLabel: 'nav.tools.istio',
+        route:          'authenticated.project.istio.index',
+        ctx:            [getProjectId],
+        resource:       [],
+        resourceScope:  'project',
+        currentWhen:    [
+          'authenticated.project.istio.project-istio',
+        ],
+      },
+      {
+        id:             'infra-secrets',
+        localizedLabel: 'nav.infra.secrets',
+        route:          'authenticated.project.secrets',
+        ctx:            [getProjectId],
+        resource:       ['namespacedsecret', 'secret', 'dockercredential', 'certificate'],
+        resourceScope:  'project',
+        currentWhen:    [
+          'authenticated.project.certificates',
+          'authenticated.project.registries',
+          'authenticated.project.secrets',
+        ],
       },
       {
         id:             'infra-config-maps',
@@ -53,23 +72,16 @@ const rootNav = [
         resource:       ['configmap'],
         resourceScope:  'project',
       },
-      {
-        id:             'infra-registries',
-        localizedLabel: 'nav.infra.registries',
-        route:          'authenticated.project.registries',
-        ctx:            [getProjectId],
-        resource:       ['dockercredential'],
-        resourceScope:  'project',
-      },
-      {
-        id:             'infra-secrets',
-        localizedLabel: 'nav.infra.secrets',
-        route:          'authenticated.project.secrets',
-        ctx:            [getProjectId],
-        resource:       ['namespacedsecret', 'secret'],
-        resourceScope:  'project',
-      },
     ],
+  },
+  {
+    scope:          'project',
+    id:             'project-apps',
+    localizedLabel: 'nav.apps.tab',
+    route:          'apps-tab',
+    ctx:            [getProjectId],
+    resource:       ['app'],
+    resourceScope:  'project',
   },
   {
     scope:          'project',
@@ -96,7 +108,6 @@ const rootNav = [
     ctx:            [getProjectId],
     resource:       [],
     resourceScope:  'global',
-    route:          'authenticated.project.alert',
     submenu:        [
       {
         id:             'tools-alerts',
@@ -166,7 +177,6 @@ const rootNav = [
     ctx:            [getClusterId],
     resource:       ['clusterroletemplatebinding'],
     resourceScope:  'global',
-    route:          'authenticated.cluster.storage',
     submenu:        [
       {
         scope:          'cluster',
@@ -213,7 +223,6 @@ const rootNav = [
     ctx:            [getClusterId],
     resource:       [],
     resourceScope:  'global',
-    route:          'authenticated.cluster.alert',
     submenu:        [
       {
         id:             'cluster-tools-alert',
@@ -267,6 +276,14 @@ const rootNav = [
         resource:       [],
         ctx:            [getClusterId],
       },
+      {
+        id:                       'cluster-tools-istio',
+        localizedLabel:           'nav.tools.istio',
+        route:                    'authenticated.cluster.istio.cluster-setting',
+        resourceScope:            'global',
+        resource:                 [],
+        ctx:                      [getClusterId],
+      },
     ],
   },
 
@@ -274,7 +291,7 @@ const rootNav = [
   {
     scope:          'global',
     id:             'global-clusters',
-    localizedLabel: 'nav.admin.clusters',
+    localizedLabel: 'nav.admin.clusters.tab',
     route:          'global-admin.clusters',
     resource:       ['cluster'],
     resourceScope:  'global',
@@ -306,12 +323,11 @@ const rootNav = [
     scope:          'global',
     id:             'global-security',
     localizedLabel: 'nav.admin.security.tab',
-    route:          'global-admin.security',
     submenu:        [
       {
         id:             'global-security-roles',
         localizedLabel: 'nav.admin.security.roles',
-        route:          'global-admin.security.roles',
+        route:          'global-admin.security.roles.index',
         resource:       ['roletemplate'],
         resourceScope:  'global',
       },
@@ -367,6 +383,21 @@ const rootNav = [
         localizedLabel: 'nav.admin.globalDnsProviders',
         route:          'global-admin.global-dns.providers',
         resource:       ['globaldnsprovider'],
+        resourceScope:  'global',
+      },
+      // {
+      //   id:             'global-registry',
+      //   localizedLabel: 'nav.admin.globalRegistry',
+      //   route:          'global-admin.global-registry',
+      //   // There is no schema for global registry. But we can use global dns to check if it is a HA env.
+      //   resource:       ['globaldns'],
+      //   resourceScope:  'global',
+      // },
+      {
+        id:             'rke-template',
+        localizedLabel: 'nav.admin.clusters.rkeTemplate',
+        route:          'global-admin.cluster-templates',
+        resource:       ['clustertemplate'],
         resourceScope:  'global',
       },
     ],

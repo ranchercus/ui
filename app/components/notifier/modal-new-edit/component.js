@@ -3,7 +3,7 @@ import { alias, reads } from '@ember/object/computed';
 import ModalBase from 'ui/mixins/modal-base';
 import { resolve } from 'rsvp';
 import layout from './template';
-import { get, set } from '@ember/object'
+import { get, set, computed } from '@ember/object'
 import { inject as service } from '@ember/service';
 import NewOrEdit from 'ui/mixins/new-or-edit';
 import C from 'ui/utils/constants';
@@ -102,6 +102,8 @@ export default Component.extend(ModalBase, NewOrEdit, {
       }
       const ok = this.validate();
 
+      this.willSave()
+
       if (!ok) {
         return resolve();
       }
@@ -155,6 +157,11 @@ export default Component.extend(ModalBase, NewOrEdit, {
     set(this, 'errors', null);
   }.observes('currentType'),
 
+  isSelectType: computed('currentType', function() {
+    const types = TYPES.map((t) => t.type)
+
+    return types.includes(get(this, 'currentType'))
+  }),
   setModel(type) {
     const cachedModel = get(this, `modelMap.${ type }`);
     const clusterId = get(this, 'cluster.id');
@@ -197,10 +204,6 @@ export default Component.extend(ModalBase, NewOrEdit, {
     if (errors.includes(preError)) {
       let afterError = ''
 
-      if (notifierType === 'slack') {
-        afterError = C.NOTIFIER_TABLE_LABEL.SLACK
-        errors.splice(errors.findIndex((e) => e === preError), 1, intl.t('validation.required', { key: afterError }))
-      }
       if (notifierType === 'email') {
         afterError = C.NOTIFIER_TABLE_LABEL.SMTP
         errors.splice(errors.findIndex((e) => e === preError), 1, intl.t('validation.required', { key: afterError }))
@@ -210,5 +213,20 @@ export default Component.extend(ModalBase, NewOrEdit, {
     set(this, 'errors', errors);
 
     return get(this, 'errors.length') === 0;
+  },
+
+  willSave() {
+    const notifierType = get(this, 'model.notifierType')
+
+    if (notifierType !== 'email') {
+      const targetConfig = get(this, `model.${ notifierType }Config`)
+
+      if (!get(targetConfig, 'proxyUrl')) {
+        delete targetConfig.proxyUrl
+      }
+      set(this, `model.${ notifierType }Config`, targetConfig)
+    }
+
+    return this._super(...arguments);
   },
 });

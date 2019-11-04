@@ -6,7 +6,7 @@ languageContribute: "Help Translate Rancher"
 # Really generic things used in multiple places (use sparingly)
 ##############################
 generic:
-  authorize: Authorize & Fetch Your Own Repositories
+  authorize: Authorize & Fetch Your Repositories
   branch: Branch
   commit: Commit
   repository: Repository
@@ -33,7 +33,7 @@ action:
 pipelinesPage:
   table:
     status: Status
-    noData: There are no pipelines defined
+    noData: There are no pipelines defined.
     noMatch: No pipelines match the current search.
   pipelines: Pipelines
   lastActivity: Last Run
@@ -52,6 +52,10 @@ pipelinesSetting:
   clearing: Clearing
   sureToClearData: Are You Sure To Clear Data?
   clearData: Clear Data
+  error:
+    limit: Error saving limit and request
+  info:
+    noPermission: You don't have permission to configure pipelines.
 
 repositories:
   header: Repositories
@@ -173,7 +177,7 @@ newPipelineStep:
       refresh: Refresh Repositories
       user: User
       trigger: Pipeline Trigger
-      noWebhook: No permission to set repositry webhooks
+      noWebhook: No permission to set repository webhooks
     build:
       imageName:
         placeholder: e.g. example/app:v1
@@ -337,7 +341,7 @@ authPage:
         labelText: Use a https connection
 pipelineDetailPage:
   header: 'Pipeline: {name}'
-  repositry: Repositry
+  repository: Repository
   lastRun: Last Run
   triggered: Triggered
   commitMessage: Commit Message

@@ -36,13 +36,18 @@ export default Component.extend({
   nextNum:       1,
   cluster:       alias('scope.currentCluster'),
   project:       alias('scope.currentProject'),
+  isWindows:     alias('scope.currentCluster.isWindows'),
 
   init() {
     this._super(...arguments);
-    this.sendAction('registerHook', this.saveVolumes.bind(this), {
-      name: 'saveVolumes',
-      key:  '_volumeHooks'
-    });
+
+    if (this.registerHook) {
+      this.registerHook(this.saveVolumes.bind(this), {
+        name: 'saveVolumes',
+        key:  '_volumeHooks'
+      });
+    }
+
     this.initVolumes()
   },
 

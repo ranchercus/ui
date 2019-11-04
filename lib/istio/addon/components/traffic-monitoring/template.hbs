@@ -1,0 +1,50 @@
+{{#if namespaces.length}}
+  <div class="row text-left mb-5">
+    <div class="pull-left pl-20 pt-0 mr-10">
+      <div class="inline-block">
+        <label class="acc-label">
+          {{t "generic.namespace"}}:
+        </label>
+        {{new-select
+          content=namespaces
+          classNames="namespace-select text-black"
+          value=namespace
+          optionValuePath="id"
+          optionLabelPath="displayName"
+        }}
+      </div>
+      <button
+        class="btn btn-sm bg-default"
+        {{action "refreshGraph"}}
+      >
+        {{t "istio.refreshGraph"}}
+      </button>
+    </div>
+  </div>
+  {{#if loading}}
+    <div class="row mt-20">
+      <div class="text-center">
+        <i class="icon icon-spinner icon-spin icon-3x"></i>
+      </div>
+    </div>
+  {{/if}}
+  <div id="kiali-div" class="{{if loading 'loading'}}">
+    <iframe src={{url}} id="kiali-iframe" scrolling="no"></iframe>
+  </div>
+  {{#unless loading}}
+    <div class="powered-by-kiali">
+      {{t "istio.kiali"}}
+      <span class="pl-5 pull-right" role="button">
+        <a href="https://www.kiali.io/" target="_blank" rel="nofollow noopener noreferrer">
+          <div class="kiali"></div>
+        </a>
+      </span>
+    </div>
+  {{/unless}}
+{{else}}
+  <div class="mt-20">
+    <div class="text-center text-muted">
+      {{t "istio.noData"}}
+    </div>
+  </div>
+{{/if}}

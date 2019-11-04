@@ -14,7 +14,7 @@ export const headersAll = [
   },
   {
     name:           'name',
-    sort:           ['displayName', 'id'],
+    sort:           ['sortName', 'id'],
     searchField:    'displayName',
     translationKey: 'generic.name',
   },
@@ -91,7 +91,9 @@ export default Component.extend({
 
   actions: {
     toggle() {
-      this.sendAction('toggle');
+      if (this.toggle) {
+        this.toggle();
+      }
     },
   },
 

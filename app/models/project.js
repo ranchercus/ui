@@ -67,6 +67,19 @@ export default Resource.extend({
     return get(this, 'scope.currentProject.id') === get(this, 'id');
   }),
 
+  canSaveMonitor: computed('isSystemProject', 'actionLinks.{editMonitoring,enableMonitoring}', function() {
+    if ( get(this, 'isSystemProject') ) {
+      return false;
+    }
+    const action = get(this, 'enableProjectMonitoring') ?  'editMonitoring' : 'enableMonitoring';
+
+    return !!this.hasAction(action)
+  }),
+
+  canDisableMonitor: computed('actionLinks.disableMonitoring', function() {
+    return !!this.hasAction('disableMonitoring')
+  }),
+
   canSetDefault: computed('combinedState', 'isDefault', function() {
     return get(this, 'combinedState') === 'active' && !get(this, 'isDefault');
   }),

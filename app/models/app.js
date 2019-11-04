@@ -12,6 +12,7 @@ const App = Resource.extend(StateCounts, EndpointPorts, {
   router:       service(),
   clusterStore: service(),
   globalStore:  service(),
+  modalService: service('modal'),
 
   canEdit:      false,
 
@@ -22,6 +23,16 @@ const App = Resource.extend(StateCounts, EndpointPorts, {
     this._super(...arguments);
     this.defineStateCounts('pods', 'podStates', 'podCountSort');
   },
+
+  isIstio: computed('catalogTemplate.isIstio', function() {
+    let { catalogTemplate } = this;
+
+    if (catalogTemplate) {
+      return get(this, 'catalogTemplate.isIstio')
+    } else {
+      return false;
+    }
+  }),
 
   pods: computed('namespace.pods.@each.workloadId', 'workloads.@each.workloadLabels', function() {
     return (get(this, 'namespace.pods') || []).filter((item) => {
@@ -117,6 +128,17 @@ const App = Resource.extend(StateCounts, EndpointPorts, {
     return out;
   }),
 
+  displayAnswerStrings: computed('answers', function() {
+    let out = [];
+    let answers = get(this, 'answers') || {};
+
+    Object.keys(answers).forEach((key) => {
+      out.push(key + (answers[key] ? `=${ answers[key] }` : ''));
+    });
+
+    return out;
+  }),
+
   externalIdInfo: computed('externalId', function() {
     return parseHelmExternalId(get(this, 'externalId'));
   }),
@@ -148,11 +170,26 @@ const App = Resource.extend(StateCounts, EndpointPorts, {
         icon:    'icon icon-history',
         action:  'rollback',
         enabled: get(this, 'canRollback')
-      }
+      },
+      {
+        label:   'action.viewYaml',
+        icon:    'icon icon-file',
+        action:  'viewYaml',
+        enabled: !!get(this, 'isIstio')
+      },
     ];
   }),
 
   actions: {
+    viewYaml(){
+      get(this, 'modalService').toggleModal('modal-istio-yaml', {
+        escToClose: true,
+        name:       get(this, 'displayName'),
+        namespace:  get(this, 'namespace.id'),
+        appId:      get(this, 'name'),
+      });
+    },
+
     upgrade() {
       const templateId    = get(this, 'externalIdInfo.templateId');
       const catalogId     = get(this, 'externalIdInfo.catalog');
@@ -165,6 +202,7 @@ const App = Resource.extend(StateCounts, EndpointPorts, {
           catalog:     catalogId,
           namespaceId: get(this, 'targetNamespace'),
           upgrade:     latestVersion,
+          istio:       get(this, 'isIstio')
         }
       });
     },

@@ -2,7 +2,7 @@ import { get, set, computed, observer } from '@ember/object';
 import { on } from '@ember/object/evented';
 import { inject as service } from '@ember/service';
 import Resource from '@rancher/ember-api-store/models/resource';
-import { hasMany } from '@rancher/ember-api-store/utils/denormalize';
+import { hasMany, reference } from '@rancher/ember-api-store/utils/denormalize';
 import ResourceUsage from 'shared/mixins/resource-usage';
 import Grafana from 'shared/mixins/grafana';
 import { equal, alias } from '@ember/object/computed';
@@ -10,6 +10,8 @@ import { resolve } from 'rsvp';
 import C from 'ui/utils/constants';
 import { isEmpty } from '@ember/utils';
 import moment from 'moment';
+const TRUE = 'True';
+const CLUSTER_TEMPLATE_ID_PREFIX = 'cattle-global-data:';
 
 export default Resource.extend(Grafana, ResourceUsage, {
   globalStore: service(),
@@ -27,6 +29,9 @@ export default Resource.extend(Grafana, ResourceUsage, {
   expiringCerts:               null,
   grafanaDashboardName:        'Cluster',
   isMonitoringReady:           false,
+  _cachedConfig:               null,
+  clusterTemplate:             reference('clusterTemplateId'),
+  clusterTemplateRevision:     reference('clusterTemplateRevisionId'),
   machines:                    alias('nodes'),
   roleTemplateBindings:        alias('clusterRoleTemplateBindings'),
   isAKS:                       equal('driver', 'azureKubernetesService'),
@@ -46,6 +51,29 @@ export default Resource.extend(Grafana, ResourceUsage, {
       set(this, 'isMonitoringReady', status);
     }
   })),
+
+  clusterTemplateDisplayName: computed('clusterTemplate.name', 'clusterTemplateId', function() {
+    const displayName = get(this, 'clusterTemplate.displayName');
+    const clusterTemplateId = (get(this, 'clusterTemplateId') || '').replace(CLUSTER_TEMPLATE_ID_PREFIX, '');
+
+    return displayName || clusterTemplateId;
+  }),
+
+  clusterTemplateRevisionDisplayName: computed('clusterTemplateRevision.name', 'clusterTemplateRevisionId', function() {
+    const displayName = get(this, 'clusterTemplateRevision.displayName');
+    const revisionId = (get(this, 'clusterTemplateRevisionId') || '').replace(CLUSTER_TEMPLATE_ID_PREFIX, '')
+
+    return displayName || revisionId;
+  }),
+
+  isClusterTemplateUpgradeAvailable: computed('clusterTemplate.latestRevision', 'clusterTemplate.latestRevision.id', 'clusterTemplateRevision.id', function() {
+    const latestClusterTemplateRevisionId = get(this, 'clusterTemplate.latestRevision.id');
+    const currentClusterTemplateRevisionId = get(this, 'clusterTemplateRevision.id');
+
+    return latestClusterTemplateRevisionId
+      && currentClusterTemplateRevisionId
+      && currentClusterTemplateRevisionId !== latestClusterTemplateRevisionId;
+  }),
 
   getAltActionDelete: computed('action.remove', function() { // eslint-disable-line
     return get(this, 'canBulkRemove') ? 'delete' : null;
@@ -89,9 +117,9 @@ export default Resource.extend(Grafana, ResourceUsage, {
     return get(this, 'configName') === 'rancherKubernetesEngineConfig';
   }),
 
-  provider: computed('configName', 'nodePools.@each.nodeTemplateId', 'driver', function() {
+  provider: computed('configName', 'nodePools.@each.{driver,nodeTemplateId}', 'driver', function() {
     const pools = get(this, 'nodePools') || [];
-    const firstTemplate = get(pools, 'firstObject.nodeTemplate');
+    const firstPool = pools.objectAt(0);
 
     switch ( get(this, 'configName') ) {
     case 'amazonElasticContainerServiceConfig':
@@ -107,15 +135,12 @@ export default Resource.extend(Grafana, ResourceUsage, {
     case 'huaweiEngineConfig':
       return 'huaweicce';
     case 'rancherKubernetesEngineConfig':
-      if ( pools.length > 0 ) {
-        if ( firstTemplate ) {
-          return get(firstTemplate, 'driver');
-        } else {
-          return null;
-        }
-      } else {
+      if ( !pools.length ) {
         return 'custom';
       }
+
+
+      return firstPool.driver || get(firstPool, 'nodeTemplate.driver') || null;
     default:
       if (get(this, 'driver') && get(this, 'configName')) {
         return get(this, 'driver');
@@ -168,8 +193,18 @@ export default Resource.extend(Grafana, ResourceUsage, {
     return get(projects, 'firstObject');
   }),
 
+  canSaveMonitor: computed('actionLinks.{editMonitoring,enableMonitoring}', function() {
+    const action = get(this, 'enableClusterMonitoring') ?  'editMonitoring' : 'enableMonitoring';
+
+    return !!this.hasAction(action)
+  }),
+
+  canDisableMonitor: computed('actionLinks.disableMonitoring', function() {
+    return !!this.hasAction('disableMonitoring')
+  }),
+
   defaultProject: computed('projects.@each.{name,clusterOwner}', function() {
-    let projects = get(this, 'projects');
+    let projects = get(this, 'projects') || [];
 
     let out = projects.findBy('isDefault');
 
@@ -244,15 +279,96 @@ export default Resource.extend(Grafana, ResourceUsage, {
     ];
   }),
 
+  isVxlan: computed('rancherKubernetesEngineConfig.network.options.flannel_backend_type', function() {
+    const backend = get(this, 'rancherKubernetesEngineConfig.network.options.flannel_backend_type');
+
+    return backend === 'vxlan';
+  }),
+
+  isWindows:  computed('windowsPreferedCluster', function() {
+    return !!get(this, 'windowsPreferedCluster');
+  }),
+
+  unhealthyComponents: computed('componentStatuses.@each.conditions', function() {
+    return (get(this, 'componentStatuses') || [])
+      .filter((s) => !(s.conditions || []).any((c) => c.status === 'True'));
+  }),
+
+  inactiveNodes: computed('nodes.@each.state', function() {
+    return (get(this, 'nodes') || []).filter( (n) => C.ACTIVEISH_STATES.indexOf(get(n, 'state')) === -1 );
+  }),
+
+  unhealthyNodes: computed('nodes.@each.conditions', function() {
+    const out = [];
+
+    (get(this, 'nodes') || []).forEach((n) => {
+      const conditions = get(n, 'conditions') || [];
+      const outOfDisk = conditions.find((c) => c.type === 'OutOfDisk');
+      const diskPressure = conditions.find((c) => c.type === 'DiskPressure');
+      const memoryPressure = conditions.find((c) => c.type === 'MemoryPressure');
+
+      if ( outOfDisk && get(outOfDisk, 'status') === TRUE ) {
+        out.push({
+          displayName: get(n, 'displayName'),
+          error:       'outOfDisk'
+        });
+      }
+
+      if ( diskPressure && get(diskPressure, 'status') === TRUE ) {
+        out.push({
+          displayName: get(n, 'displayName'),
+          error:       'diskPressure'
+        });
+      }
+
+      if ( memoryPressure && get(memoryPressure, 'status') === TRUE ) {
+        out.push({
+          displayName: get(n, 'displayName'),
+          error:       'memoryPressure'
+        });
+      }
+    });
+
+    return out;
+  }),
+
+  displayWarnings: computed('unhealthyNodes.[]', 'provider', 'inactiveNodes.[]', 'unhealthyComponents.[]', function() {
+    const intl = get(this, 'intl');
+    const out = [];
+    const unhealthyComponents = get(this, 'unhealthyComponents') || [];
+    const inactiveNodes = get(this, 'inactiveNodes') || [];
+    const unhealthyNodes = get(this, 'unhealthyNodes') || [];
+    const provider = get(this, 'provider');
+
+    const grayOut = C.GRAY_OUT_SCHEDULER_STATUS_PROVIDERS.indexOf(provider) > -1;
+
+    unhealthyComponents.forEach((component) => {
+      if ( grayOut && (get(component, 'name') === 'scheduler' || get(component, 'name') === 'controller-manager') ) {
+        return;
+      }
+      out.pushObject(intl.t('clusterDashboard.alert.component', { component: get(component, 'name') }));
+    });
+
+    inactiveNodes.forEach((node) => {
+      out.pushObject(intl.t('clusterDashboard.alert.node', { node: get(node, 'displayName') }))
+    });
+
+    unhealthyNodes.forEach((node) => {
+      out.pushObject(intl.t(`clusterDashboard.alert.nodeCondition.${ get(node, 'error') }`, { node: get(node, 'displayName') }))
+    });
+
+    return out;
+  }),
+
   actions: {
     backupEtcd() {
       const getBackupType = () => {
         let services = get(this, 'rancherKubernetesEngineConfig.services.etcd');
 
-        if (get(services, 'backupConfig')) {
-          if (isEmpty(services.backupConfig.s3BackupConfig)) {
+        if (get(services, 'cachedConfig')) {
+          if (isEmpty(services.cachedConfig.s3BackupConfig)) {
             return 'local';
-          } else if (!isEmpty(services.backupConfig.s3BackupConfig)) {
+          } else if (!isEmpty(services.cachedConfig.s3BackupConfig)) {
             return 's3';
           }
         }
@@ -290,8 +406,13 @@ export default Resource.extend(Grafana, ResourceUsage, {
 
     edit() {
       let provider = get(this, 'provider') || get(this, 'driver');
+      let queryParams = { queryParams: { provider } };
 
-      get(this, 'router').transitionTo('authenticated.cluster.edit', get(this, 'id'), { queryParams: { provider } });
+      if (this.clusterTemplateRevisionId) {
+        set(queryParams, 'queryParams.clusterTemplateRevision', this.clusterTemplateRevisionId);
+      }
+
+      this.router.transitionTo('authenticated.cluster.edit', get(this, 'id'), queryParams);
     },
 
     scaleDownPool(id) {
@@ -319,6 +440,32 @@ export default Resource.extend(Grafana, ResourceUsage, {
       });
     },
 
+  },
+
+  clearConfigFieldsForClusterTemplate() {
+    let clearedNull   = ['localClusterAuthEndpoint', 'rancherKubernetesEngineConfig', 'enableNetworkPolicy'];
+    let clearedDelete = ['defaultClusterRoleForProjectMembers', 'defaultPodSecurityPolicyTemplateId'];
+    let {
+      localClusterAuthEndpoint,
+      rancherKubernetesEngineConfig,
+      enableNetworkPolicy,
+      defaultClusterRoleForProjectMembers,
+      defaultPodSecurityPolicyTemplateId,
+    } = this;
+
+    let cachedConfig = {
+      localClusterAuthEndpoint,
+      rancherKubernetesEngineConfig,
+      enableNetworkPolicy,
+      defaultClusterRoleForProjectMembers,
+      defaultPodSecurityPolicyTemplateId,
+    };
+
+    // set this incase we fail to save the cluster;
+    set(this, '_cachedConfig', cachedConfig);
+
+    clearedDelete.forEach((c) => delete this[c]);
+    clearedNull.forEach((c) => set(this, c, null));
   },
 
   clearProvidersExcept(keep) {

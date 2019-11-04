@@ -56,6 +56,16 @@ var Workload = Resource.extend(Grafana, DisplayImage, StateCounts, EndpointPorts
     this.defineStateCounts('pods', 'podStates', 'podCountSort');
   },
 
+  restarts: computed('pods.@each.restarts', function() {
+    let out = 0;
+
+    (get(this, 'pods') || []).forEach((pod) => {
+      out += get(pod, 'restarts');
+    });
+
+    return out;
+  }),
+
   lcType: computed('type', function() {
     return (get(this, 'type') || '').toLowerCase();
   }),
@@ -181,9 +191,9 @@ var Workload = Resource.extend(Grafana, DisplayImage, StateCounts, EndpointPorts
     }
   }),
 
-  podForShell: function() {
-    return get(this, 'pods').findBy('combinedState', 'running');
-  }.property('pods.@each.combinedState'),
+  podForShell: computed('pods.@each.canShell', function() {
+    return get(this, 'pods').findBy('canShell', true);
+  }),
 
   secondaryLaunchConfigs: computed('containers.[]', function() {
     return (get(this, 'containers') || []).slice(1);
