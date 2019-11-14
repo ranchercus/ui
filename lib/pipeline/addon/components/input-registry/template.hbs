@@ -22,7 +22,18 @@
         </div>
       </div>
     {{/unless}}
-    <label class='acc-label pb-5'>推送文件路径</label>
-    {{input type="text" value=config.pushFilePath classNames="form-control"}}
+
+    <label class='acc-label pb-5'>选择回调脚本</label>
+    {{new-select
+      content=scriptsChoices
+      optionLabelPath="label"
+      optionValuePath="value"
+      value=config.callbackScript
+    }}
+    <label class='acc-label pb-5'>回调脚本参数</label>
+    {{input
+      class="form-control"
+      value=config.callbackScriptParams
+    }}
   {{/if}}
 </div>
