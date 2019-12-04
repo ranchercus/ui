@@ -46,3 +46,7 @@ GTAGS
 yarn-error.log
 !Dockerfile.dapper
 Dockerfile.dapper*
+
+ssl\server.crt1.crt
+ssl\server.csr1
+ssl\server.key1.key

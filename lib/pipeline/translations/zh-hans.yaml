@@ -193,6 +193,23 @@ newPipelineStep:
       label: 构建并发布镜像
       dockerFilePath: Dockerfile路径
       buildContext: 构建上下文
+      callbackScript: 选择回调脚本
+      callbackScriptParams: 回调脚本参数
+      deploy: 推送完成后立即更新工作负载
+      targetNamespace:
+        label: 命名空间
+        helpText: 部署应用的命名空间。
+      workloadId:
+        label: 工作负载
+        prompt: 选择工作负载...
+      containerIndex:
+        label: 部署容器序号
+        helpText: 默认部署至第一个容器
+      port:
+        label: 集群IP端口映射，设置后将覆盖原来的映射
+        helpText: 多个端口用逗号(,)隔开
+      deployService:
+        label: 同时部署/更新服务发现
     task:
       label: 运行脚本
       shellScript: 脚本
