@@ -22,24 +22,28 @@
         </div>
       </div>
     {{/unless}}
-    <div class="row">
-      <div class="col span-3">
-      <label class='acc-label pb-5'>{{t "newPipelineStep.stepType.build.callbackScript"}}</label>
-      {{new-select
-        content=scriptsChoices
-        optionLabelPath="label"
-        optionValuePath="value"
-        value=config.callbackScript
-      }}
-      </div>
-      <div class="col span-9">
-      <label class='acc-label pb-5'>{{t "newPipelineStep.stepType.build.callbackScriptParams"}}</label>
-      {{input
-        class="form-control"
-        value=config.callbackScriptParams
-      }}
-      </div>
-    </div>
+    {{#if (eq loading false)}}
+      {{#if showRunCs}}
+        <div class="row">
+          <div class="col span-3">
+          <label class='acc-label pb-5'>{{t "newPipelineStep.stepType.build.callbackScript"}}</label>
+          {{new-select
+            content=scriptsChoices
+            optionLabelPath="label"
+            optionValuePath="value"
+            value=config.callbackScript
+          }}
+          </div>
+          <div class="col span-9">
+          <label class='acc-label pb-5'>{{t "newPipelineStep.stepType.build.callbackScriptParams"}}</label>
+          {{input
+            class="form-control"
+            value=config.callbackScriptParams
+          }}
+          </div>
+        </div>
+      {{/if}}
+    {{/if}}
     <div class="checkbox pt-10 pb-10">
       <label>
         {{input type="checkbox" checked=config.deploy}}
