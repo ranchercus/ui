@@ -32,6 +32,7 @@ Connect to UI at https://localhost:8000/ .  The server automatically picks up fi
 Run development server pointed at another instance of the Rancher API
 ```bash
   RANCHER="https://rancher-server" yarn start
+  RANCHER="http://dev.rancher.com:8080" yarn start
 ```
 
 RANCHER can also be `hostname[:port]` or `ip[:port]`.
