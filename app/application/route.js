@@ -26,18 +26,21 @@ export default Route.extend({
 
     let agent = window.navigator.userAgent.toLowerCase();
 
-    if ( agent.indexOf('msie ') >= 0 || agent.indexOf('trident/') >= 0 ) {
+    // Show the we don't support internet explorer or edge browsers (only edge html based browsers the mobile and chromium based browsers should be okay).
+    if ( agent.indexOf('msie ') >= 0 || agent.indexOf('trident/') >= 0 || agent.indexOf('edge/') >= 0) {
       this.replaceWith('ie');
 
       return;
     }
 
     // Find out if auth is enabled
-    return get(this, 'access').detect();
+    return get(this, 'access').detect().finally(() => {
+      return get(this, 'language').initLanguage();
+    });
   },
+
   model(params, transition) {
     transition.finally(() => {
-      get(this, 'language').initLanguage();
       this.controllerFor('application').setProperties({
         state:             null,
         code:              null,

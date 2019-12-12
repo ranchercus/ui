@@ -320,11 +320,7 @@ export default Component.extend(NewOrEdit, CatalogApp, ChildHook, {
     const errors = get(this, 'errors') || [];
 
     errors.pushObjects(get(this, 'namespaceErrors') || []);
-    let yaml = get(this, 'selectedTemplateModel.valuesYaml');
-
-    if ( !yaml && !this.shouldFallBackToYaml() ) {
-      errors.pushObjects(get(this, 'selectedTemplateModel').validationErrors() || []);
-    }
+    errors.pushObjects(get(this, 'selectedTemplateModel').validationErrors(this.answers) || []);
 
     if (errors.length) {
       set(this, 'errors', errors.uniq());
