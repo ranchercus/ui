@@ -88,6 +88,13 @@ let Pipeline = Resource.extend({
         enabled:  !!l.yaml,
         bulkable: false
       },
+      {
+        label:    '123',
+        icon:     'icon icon-edit',
+        action:   'cloneConfig',
+        enabled:  !!l.update,
+        bulkable: false
+      },
       { divider: true },
       {
         label:    'action.setting',
@@ -115,6 +122,13 @@ let Pipeline = Resource.extend({
 
     editConfig() {
       get(this, 'router').transitionTo('authenticated.project.pipeline.pipelines.edit', get(this, 'id'))
+    },
+
+    cloneConfig() {
+      get(this, 'modalService').toggleModal('modal-pipeline-clone', {
+        originalModel: this,
+        escToClose:    true,
+      });
     },
 
     editYaml() {
