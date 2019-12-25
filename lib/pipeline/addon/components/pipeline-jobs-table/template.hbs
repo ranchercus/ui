@@ -21,7 +21,11 @@
       </td>
       <td data-title="{{dt.repositoryUrl}}" class="clip">
         {{#link-to "pipelines.detail" inst.id}}
-          {{inst.displayName}}
+          {{#if inst.subPath }}
+            {{inst.displayName}}/{{inst.subPath}}
+          {{else}}
+            {{inst.displayName}}
+          {{/if}}
         {{/link-to}}
       </td>
       <td data-title="{{dt.runCount}}" class="clip">

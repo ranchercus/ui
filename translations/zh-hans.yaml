@@ -8421,6 +8421,7 @@ action:
   editConfig: 编辑配置
   editService: 编辑服务
   editYaml: '查看/编辑 YAML'
+  subPipeline: 新增子线
   evacuate: 疏散
   execute: 执行命令行
   exportConfig: 导出配置

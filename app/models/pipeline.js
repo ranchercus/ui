@@ -89,10 +89,10 @@ let Pipeline = Resource.extend({
         bulkable: false
       },
       {
-        label:    '123',
-        icon:     'icon icon-edit',
-        action:   'cloneConfig',
-        enabled:  !!l.update,
+        label:    'action.subPipeline',
+        icon:     'icon icon-plus',
+        action:   'subConfig',
+        enabled:  !!l.update && !get(this, 'subPath'),
         bulkable: false
       },
       { divider: true },
@@ -124,8 +124,8 @@ let Pipeline = Resource.extend({
       get(this, 'router').transitionTo('authenticated.project.pipeline.pipelines.edit', get(this, 'id'))
     },
 
-    cloneConfig() {
-      get(this, 'modalService').toggleModal('modal-pipeline-clone', {
+    subConfig() {
+      get(this, 'modalService').toggleModal('modal-pipeline-sub', {
         originalModel: this,
         escToClose:    true,
       });

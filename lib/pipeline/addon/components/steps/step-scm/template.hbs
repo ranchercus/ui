@@ -10,3 +10,17 @@
     {{/if}}
   </div>
 </div>
+<div class="row">
+  <div class="col span-6">
+    {{#if pipeline.subPath}}
+      <label class="acc-label pb-5">子线路径</label>
+      <div class="mt-0">{{pipeline.subPath}}</div>
+    {{/if}}
+  </div>
+  <div class="col span-6">
+    {{#if pipeline.ctxPath}}
+      <label class="acc-label pb-5">构建上下文路径</label>
+      <div class="mt-0">{{pipeline.ctxPath}}</div>
+    {{/if}}
+  </div>
+</div>
