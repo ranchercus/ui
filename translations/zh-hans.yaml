@@ -9676,6 +9676,16 @@ runPipeline:
   noBranch: '该代码库没有发现<code>.rancher-pipeline.yml</code>文件。您可以点击<b>编辑配置</b>通过向导的方式配置流水线，也可以点击<b>查看/编辑YAML</b>直接修改配置。'
   branch:
     label: '分支'
+  runCallbackScript: 选择是否执行回调脚本
+  runCodeScanner: 选择是否执行代码扫描
+
+subPipeline:
+  title: '子线设置"{name}"'
+  subpath:
+    label: 子路径
+    helpText: '指定代码仓库的文件夹路径，不指定则为最顶层目录'
+  isContextPath:
+    label: 是否设置为构建上下文
 
 pipelineSetting:
   title: '流水线设置"{name}"'

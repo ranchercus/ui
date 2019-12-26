@@ -44,6 +44,11 @@ function readLocales(environment) {
     var ymlFile = YAML.load('./translations/' + filename);
     var label  = ymlFile.languageName;
     var locale = filename.split('.')[0];
+    // Author: Zac+
+    if ( label !== '简体中文' ) {
+      return;
+    }
+    // Author: Zac-
     translationsOut[locale] = label;
   });
   return translationsOut;

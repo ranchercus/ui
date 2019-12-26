@@ -21,13 +21,13 @@
     {{#if showRunCs}}
       <div class="col span-6">
         {{input type="checkbox" checked=runCallbackScript}}
-        <label class="acc-label">选择是否执行回调脚本</label>
+        <label class="acc-label">{{t "runPipeline.runCallbackScript"}}</label>
       </div>
     {{/if}}
     {{#if showRunScan}}
       <div class="col span-6">
         {{input type="checkbox" checked=runCodeScanner}}
-        <label class="acc-label">选择是否执行代码扫描</label>
+        <label class="acc-label">{{t "runPipeline.runCodeScanner"}}</label>
       </div>
     {{/if}}
   </div>

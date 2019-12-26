@@ -1,21 +1,21 @@
 <h2>
-  子线设置
+  {{t "subPipeline.title" name=model.displayName}}
 </h2>
 
 <div class="row">
   <label class="acc-label pb-5">
-    子路径
+    {{t "subPipeline.subpath.label" }}
   </label>
   {{input
     class="form-control"
     value=subPath
-    placeholder='指定代码仓库的文件夹路径，不指定则为最顶层目录'
+    placeholder=(t 'subPipeline.subpath.helpText')
   }}
 </div>
 <div class="row">
   {{input type="checkbox" checked=isContextPath }}
   <label class="acc-label pb-5">
-    是否设置为构建上下文
+    {{t "subPipeline.isContextPath.label" }}
   </label>
 </div>
 {{top-errors errors=errors}}
