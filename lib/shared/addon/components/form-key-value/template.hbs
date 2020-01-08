@@ -69,16 +69,21 @@
                 @value={{row.value}}
                 @placeholder={{keyPlaceholder}}
                 @disabled={{not (and allowEditKey (not-eq row.editable false))}}
+                @readonly={{allowBinary}}
               />
             {{else}}
               {{#if allowMultilineValue}}
-                {{textarea-autogrow class=(concat "form-control input-sm value" (if concealValue " conceal")) spellcheck="false" required=true value=row.value placeholder=valuePlaceholder disabled=(eq row.editable false)}}
+                {{textarea-autogrow class=(concat "form-control input-sm value" (if concealValue " conceal")) spellcheck="false" required=true value=row.value placeholder=valuePlaceholder disabled=(eq row.editable false) readonly=allowBinary}}
               {{else}}
-                {{input class=(concat "form-control input-sm value" (if concealValue " conceal")) spellcheck="false" type="text" value=row.value placeholder=valuePlaceholder disabled=(eq row.editable false)}}
+                {{input class=(concat "form-control input-sm value" (if concealValue " conceal")) spellcheck="false" type="text" value=row.value placeholder=valuePlaceholder disabled=(eq row.editable false) readonly=allowBinary}}
               {{/if}}
             {{/if}}
           {{else}}
+            {{#if allowBinary}}
+              <div class="{{if concealValue "conceal"}}" style="text-overflow:ellipsis;overflow:hidden;white-space:nowrap;">{{nl-to-br row.value}}</div>
+            {{else}}
             <span class="{{if concealValue "conceal"}}">{{nl-to-br row.value}}</span>
+            {{/if}}
           {{/if}}
         </td>
         <td>&nbsp;</td>
@@ -113,4 +118,8 @@
     </button>
   </div>
 {{/if}}
-<input type="file" accept="text/*" class="hide">
+{{#if allowBinary}}
+  <input type="file" accept="*" name="binary" class="hide">
+{{else}}
+  <input type="file" accept="text/*" class="hide">
+{{/if}}

@@ -47,6 +47,18 @@
 
 <div class="box mt-10 mb-20">
   {{form-key-value
+    initialMap=primaryResource.binaryData
+    allowEmptyValue=true
+    header=(t "newConfigMap.values.labelBinary")
+    allowUpload=true
+    allowAdd=false
+    editing=notView
+    changed=(action "updateBinaryData")
+    allowBinary=true
+  }}
+</div>
+<div class="box mt-10 mb-20">
+  {{form-key-value
     initialMap=primaryResource.data
     allowEmptyValue=true
     header=(t "newConfigMap.values.label")

@@ -7836,6 +7836,7 @@ newConfigMap:
     placeholder: '例如: app'
   values:
     label: 配置映射
+    labelBinary: 配置映射（二进制）
   addActionLabel: 添加配置映射
 
 projectGroup:

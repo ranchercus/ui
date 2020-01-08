@@ -14,3 +14,7 @@ lib/pipeline/app/components/modal-pipeline-sub/component.js
 app/authenticated/template.hbs
 config/environment.js
 lib/shared/addon/utils/constants.js
+app/components/cru-config-map/component.js
+app/components/cru-config-map/template.hbs
+lib/shared/addon/components/form-key-value/component.js
+lib/shared/addon/components/form-key-value/template.hbs

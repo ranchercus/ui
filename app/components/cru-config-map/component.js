@@ -34,6 +34,9 @@ export default Component.extend(ViewNewEdit, OptionallyNamespaced, {
     updateData(map) {
       set(this, 'primaryResource.data', map);
     },
+    updateBinaryData(map) {
+      set(this, 'primaryResource.binaryData', map);
+    },
   },
 
   willSave() {
