@@ -18,3 +18,4 @@ app/components/cru-config-map/component.js
 app/components/cru-config-map/template.hbs
 lib/shared/addon/components/form-key-value/component.js
 lib/shared/addon/components/form-key-value/template.hbs
+lib/pipeline/addon/components/enable-repositories/component.js
