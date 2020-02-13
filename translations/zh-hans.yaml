@@ -8393,6 +8393,7 @@ nav:
     pipeline: 流水线
     tab: 工具
     istio: Istio
+    pipelineTemplate: 流水线模板
   project:
     none: '项目/命名空间'
     namespaces: 命名空间
@@ -9501,6 +9502,7 @@ newPipelineStage:
   header:
     create: 添加阶段
     edit: 编辑阶段
+    import: 从模板加载
   name:
     placeholder: "例如: compile"
   addStep: 添加步骤
@@ -9764,3 +9766,26 @@ pipelineNotification:
   recipients:
     required: 接受者必填
   asMessage: 发送信息到
+
+pipelineTemplate:
+  header: '流水线模板：{name}'
+  list: 流水线模板列表
+  select: 选择流水线模板
+  add:
+    label: 添加模板
+    header: 新增流水线模板
+  edit:
+    header: 编辑流水线模板
+  question:
+    label: 参数
+    line: 参数配置
+    none: 该模板没有参数配置
+  template:
+    label: 模板内容
+    select: 选择模板
+  category:
+    label: 分类
+    add: 添加分类
+    select: 选择分类
+    none: 该模板未分类
+    holder: 例如：Java

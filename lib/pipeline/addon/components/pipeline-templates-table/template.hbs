@@ -1,0 +1,36 @@
+{{#sortable-table
+  tableClassNames="double-rows"
+  bulkActions=true
+  body=body
+  sortBy=sortBy
+  fullRows=true
+  search=search
+  groupByKey=groupByKey
+  groupByRef=groupByRef
+  headers=headers as |sortable kind inst dt|
+  }}
+  {{#if (eq kind "row")}}
+    <tr class="main-row">
+      {{#if body.length}}
+        <td valign="middle" class="row-check" style="padding-top: 2px;">
+          {{check-box nodeId=inst.id}}
+        </td>
+      {{/if}}
+      <td class="clip">
+        {{#link-to "pipeline-templates.detail" inst.id}}
+          {{inst.displayName}}
+        {{/link-to}}
+      </td>
+      <td class="clip">
+        {{inst.categories}}
+      </td>
+      <td data-title="{{dt.actions}}" class="actions">
+        {{action-menu model=inst showPrimary=true}}
+      </td>
+    </tr>
+  {{else if (eq kind "nomatch")}}
+    <tr><td colspan="{{sortable.fullColspan}}" class="text-center text-muted lacsso pt-20 pb-20">{{t 'pipelinesPage.table.noMatch'}}</td></tr>
+  {{else if (eq kind "norows")}}
+    <tr><td colspan="{{sortable.fullColspan}}" class="text-center text-muted lacsso pt-20 pb-20">{{t 'pipelinesPage.table.noData'}}</td></tr>
+  {{/if}}
+{{/sortable-table}}

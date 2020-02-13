@@ -284,6 +284,14 @@ const rootNav = [
         resource:                 [],
         ctx:                      [getClusterId],
       },
+      {
+        id:                       'cluster-tools-pipeline',
+        localizedLabel:           'nav.tools.pipelineTemplate',
+        route:                    'authenticated.cluster.pipeline.pipeline-templates',
+        resourceScope:            'global',
+        resource:                 [],
+        ctx:                      [getClusterId],
+      },
     ],
   },
 

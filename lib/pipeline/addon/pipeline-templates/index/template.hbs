@@ -1,0 +1,17 @@
+<section class="header clearfix">
+  <div class="right-buttons">
+    {{#link-to "pipeline-templates.new" class="btn btn-sm bg-primary"}}
+      {{t 'pipelineTemplate.add.label'}}
+    {{/link-to}}
+  </div>
+
+  <h1>{{t 'pipelineTemplate.list'}}</h1>
+</section>
+<section class="instances">
+  {{pipeline-templates-table
+    body=model
+    bulkActions=true
+    search=true
+    paging=true
+  }}
+</section>

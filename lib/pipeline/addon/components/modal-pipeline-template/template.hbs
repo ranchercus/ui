@@ -1,0 +1,107 @@
+{{#if loading}}
+  <i class="icon icon-spinner icon-spin"/> {{t "generic.loading"}}
+{{else}}
+<section class="header clearfix">
+  <h2>{{t 'pipelineTemplate.select'}}</h2>
+</section>
+<div class="row inline-form">
+  <div class="col span-6">
+    <label class="acc-label">
+      {{t 'pipelineTemplate.category.select'}}
+    </label>
+    <div class="dropdown filter-group">
+      {{#basic-dropdown
+         horizontalPosition="right"
+         verticalPosition="below"
+         as |dd|
+      }}
+        {{#dd.trigger
+           class="btn bg-default"
+        }}
+          <i class="icon icon-chevron-down pull-right ml-10"></i>
+          <span class="text-capitalize">
+            {{#if (eq category "")}}
+              {{t "catalogPage.index.allCategories"}}
+            {{else}}
+              {{category}}
+            {{/if}}
+          </span>
+        {{/dd.trigger}}
+
+        {{#dd.content
+           class="text-right"
+        }}
+          <li class="text-capitalize {{if (eq category "") "active"}}">
+            <a href="#" {{action "filterCatalog" "" dd}}>
+              {{t "catalogPage.index.allCategories"}}
+            </a>
+          </li>
+          {{#each categories as |opt|}}
+            <li class="{{if (eq category opt.category) "active"}}">
+              <a href="#" {{action "filterCatalog" opt.category dd}}>
+                <div class="text-capitalize">{{opt.name}}</div>
+              </a>
+            </li>
+          {{/each}}
+        {{/dd.content}}
+
+      {{/basic-dropdown}}
+    </div>
+  </div>
+  <div class="col span-6">
+    <label class="acc-label">
+      {{t 'pipelineTemplate.template.select'}}
+    </label>
+    {{searchable-select
+      content=templateChoices
+      allowCustom=false
+      value=selectedTemplate
+    }}
+  </div>
+</div>
+
+<div class="row mb-10">
+  {{input-yaml
+    showUpload=false
+    showDownload=false
+    canChangeName=false
+    value=ppTemplate
+    autoResize=true
+    readOnly=isView
+    loading=false
+  }}
+</div>
+{{#if ppTemplate}}
+  {{#if params.length}}
+    <div class="over-hr">
+      <span>
+        {{t 'pipelineTemplate.question.line'}}
+      </span>
+    </div>
+  {{/if}}
+  <div class="row mb-10">
+    {{#each params as |param| }}
+    <div class="col span-6">
+      <label class="acc-label">
+        {{param.label}}{{field-required}}
+      </label>
+      {{input
+        type="text"
+        value=param.answer
+        class="form-control"
+      }}
+    </div>
+    {{else}}
+      <span class="text-muted">{{t 'pipelineTemplate.question.none'}}</span>
+    {{/each}}
+  </div>
+{{/if}}
+{{top-errors errors=errors}}
+{{save-cancel
+  saveDisabled=state.saveDisabled
+  editing=editing
+  createLabel="generic.done"
+  save=(action "save")
+  cancel=(action "cancel")
+}}
+{{/if}}

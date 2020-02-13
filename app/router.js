@@ -67,6 +67,9 @@ Router.map(function() {
 
       this.mount('monitoring');
       this.mount('istio');
+      // Author: Zac+
+      this.mount('pipeline');
+      // Author: Zac-
 
       this.route('projects', { path: '/projects-namespaces' }, function() {
         this.route('index', { path: '/' });

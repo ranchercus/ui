@@ -1,0 +1,54 @@
+{{#if loading}}
+  <i class="icon icon-spinner icon-spin"/> {{t "generic.loading"}}
+{{else}}
+  <section class="header clearfix">
+    <div class="pull-left">
+      <h1 class="vertical-middle">
+        {{t 'pipelineTemplate.header' name=model.displayName}}
+      </h1>
+    </div>
+  </section>
+  <div class="row">
+    <div class="col span-8">
+      <label class="text-muted">
+        {{t 'pipelineTemplate.template.label'}}
+      </label>
+      {{input-yaml
+        showUpload=false
+        showDownload=false
+        canChangeName=false
+        value=model.template
+        autoResize=false
+        readOnly=true
+        loading=false
+      }}
+    </div>
+    <div class="col span-4">
+      <div class="row">
+        <label class="text-muted">
+        {{t 'pipelineTemplate.question.label'}}
+        </label>
+        {{#each model.questions as |q| }}
+          <div>
+            {{q}}
+          </div>
+        {{else}}
+          <div><span class="text-muted">{{t 'pipelineTemplate.question.none'}}</span></div>
+        {{/each}}
+      </div>
+      <hr class="mt-15 mb-15" />
+      <div class="row">
+        <label class="text-muted">
+        {{t 'pipelineTemplate.category.label'}}
+        </label>
+        {{#each model.categories as |q| }}
+          <div>
+            {{q}}
+          </div>
+        {{else}}
+          <div><span class="text-muted">{{t 'pipelineTemplate.category.none'}}</span></div>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+{{/if}}
