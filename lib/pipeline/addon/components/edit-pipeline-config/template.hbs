@@ -116,6 +116,17 @@
               </p>
             </div>
           </div>
+          <div class="row">
+            <label class="acc-label">
+              {{t "pipelineEnv.helpText"}}
+            </label>
+              {{form-key-value
+                changedArray=(action (mut envSelector))
+                initialMap=envSelector
+                allowEmptyValue=true
+                addActionLabel="pipelineEnv.addSelectorLabel"
+              }}
+          </div>
         {{/advanced-section}}
       {{/if}}
     {{/if}}

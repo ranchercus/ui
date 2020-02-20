@@ -9738,6 +9738,9 @@ pipelineSelector:
   pr: 拉取请求
   push: 推送
   tag: Tag
+pipelineEnv:
+  addSelectorLabel: 添加环境变量
+  helpText: 环境变量，设置后将会在流水线构建时注入，脚本可直接引用
 
 fromSecret:
   addFrom: 从密文中添加
