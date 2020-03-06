@@ -93,7 +93,8 @@ export default Route.extend(Preload, {
           this.loadClusters(),
           this.loadProjects(),
           this.loadPreferences(),
-        // this.loadPublicSettings(),
+          this.loadClusterSettings(),
+          // this.loadPublicSettings(),
         ];
 
         const globalStore = get(this, 'globalStore');
@@ -366,6 +367,10 @@ export default Route.extend(Preload, {
 
   loadPublicSettings() {
     return get(this, 'globalStore').find('setting', null, { url: 'settings' });
+  },
+
+  loadClusterSettings() {
+    return get(this, 'globalStore').find('clustersetting', null, { url: 'clustersettings' });
   },
 
   loadSecrets() {

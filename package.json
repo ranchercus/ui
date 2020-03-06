@@ -136,7 +136,8 @@
       "lib/pipeline",
       "lib/monitoring",
       "lib/istio",
-      "lib/shared"
+      "lib/shared",
+      "lib/harbor"
     ]
   }
 }

@@ -1,0 +1,11 @@
+<section class="header clearfix">
+  <h1>{{t 'harbor.repository.header' name=model.projectName}}</h1>
+</section>
+<section class="instances">
+  {{repository-table
+    body=repositories
+    bulkActions=false
+    search=true
+    paging=true
+  }}
+</section>

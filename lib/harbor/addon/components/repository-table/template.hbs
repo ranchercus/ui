@@ -1,0 +1,32 @@
+{{#sortable-table
+  tableClassNames="double-rows"
+  bulkActions=bulkActions
+  body=body
+  sortBy=sortBy
+  fullRows=true
+  search=search
+  groupByKey=groupByKey
+  groupByRef=groupByRef
+  paging=paging
+  headers=headers as |sortable kind inst dt|
+  }}
+  {{#if (eq kind "row")}}
+    <tr class="main-row">
+      <td class="clip">
+        <a href="#" {{action 'showTags' inst.name}}>
+          {{inst.name}}
+        </a>
+      </td>
+      <td class="clip">
+        {{inst.tags_count}}
+      </td>
+      <td class="clip">
+        {{inst.pull_count}}
+      </td>
+    </tr>
+  {{else if (eq kind "nomatch")}}
+    <tr><td colspan="{{sortable.fullColspan}}" class="text-center text-muted lacsso pt-20 pb-20">{{t 'harbor.repository.noMatch'}}</td></tr>
+  {{else if (eq kind "norows")}}
+    <tr><td colspan="{{sortable.fullColspan}}" class="text-center text-muted lacsso pt-20 pb-20">{{t 'harbor.repository.noData'}}</td></tr>
+  {{/if}}
+{{/sortable-table}}

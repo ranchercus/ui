@@ -8394,6 +8394,7 @@ nav:
     tab: 工具
     istio: Istio
     pipelineTemplate: 流水线模板
+    registry: 镜像仓库
   project:
     none: '项目/命名空间'
     namespaces: 命名空间
@@ -9792,3 +9793,53 @@ pipelineTemplate:
     select: 选择分类
     none: 该模板未分类
     holder: 例如：Java
+
+harbor:
+  project:
+    header: '镜像库：{name}'
+    name:
+      label: 项目名称
+    public:
+      label: 访问级别
+      private: 私有
+      public: 公开
+    role:
+      label: 角色
+      guest: 访客
+      developer: 开发人员
+      manager: 项目管理员
+    repoCount:
+      label: 镜像仓库数
+    creationTime:
+      label: 创建时间
+    noData: 没有项目数据
+    noMatch: 没有匹配的项目
+  repository:
+    header: '项目：{name}'
+    name:
+      label: 名称
+    tagsCount:
+      label: 标签数
+    pullCount:
+      label: 下载数
+    noData: 没有Repository数据
+    noMatch: 没有匹配的Repository
+  tag:
+    header: '{name}镜像列表'
+    name:
+      label: 标签
+    size:
+      label: 大小
+    author:
+      label: 作者
+    created:
+      label: 创建时间
+    dockerVersion:
+      label: Docker版本
+    tagLabels:
+      label: 标签
+    cmd:
+      pull: pull命令
+      fullName: 完整名
+    noData: 没有Tag数据
+    noMatch: 没有匹配的Tag

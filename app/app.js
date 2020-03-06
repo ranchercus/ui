@@ -233,6 +233,24 @@ const App = Application.extend({
         externalRoutes: { 'authenticated.cluster.istio.cluster-setting': 'authenticated.cluster.istio.cluster-setting', }
       }
     },
+    harbor: {
+      dependencies: {
+        services: [
+          'app',
+          'intl',
+          'scope',
+          'session',
+          'modal',
+          'store',
+          'catalog',
+          'globalStore',
+          'router',
+          'clusterStore',
+          'tooltip',
+        ],
+        externalRoutes: {}
+      }
+    }
   }
 });
 

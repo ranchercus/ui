@@ -1,0 +1,48 @@
+{{#sortable-table
+  tableClassNames="double-rows"
+  bulkActions=bulkActions
+  body=body
+  sortBy=sortBy
+  fullRows=true
+  search=search
+  groupByKey=groupByKey
+  groupByRef=groupByRef
+  paging=paging
+  headers=headers as |sortable kind inst dt|
+  }}
+  {{#if (eq kind "row")}}
+    <tr class="main-row">
+      <td class="clip">
+        {{#link-to "repositories.index" inst.id}}
+          {{inst.name}}
+        {{/link-to}}
+      </td>
+      <td class="clip">
+        {{#if inst.harborMeta.public}}
+        {{t 'harbor.project.public.public'}}
+        {{else}}
+        {{t 'harbor.project.public.private'}}
+        {{/if}}
+      </td>
+      <td class="clip">
+        {{#if (eq inst.current_user_role_id 1)}}
+        {{t 'harbor.project.role.manager'}}
+        {{else if (eq inst.current_user_role_id 2)}}
+        {{t 'harbor.project.role.developer'}}
+        {{else if (eq inst.current_user_role_id 3)}}
+        {{t 'harbor.project.role.guest'}}
+        {{/if}}
+      </td>
+      <td class="clip">
+        {{inst.repo_count}}
+      </td>
+      <td class="clip">
+        {{inst.creation_time}}
+      </td>
+    </tr>
+  {{else if (eq kind "nomatch")}}
+    <tr><td colspan="{{sortable.fullColspan}}" class="text-center text-muted lacsso pt-20 pb-20">{{t 'harbor.project.noMatch'}}</td></tr>
+  {{else if (eq kind "norows")}}
+    <tr><td colspan="{{sortable.fullColspan}}" class="text-center text-muted lacsso pt-20 pb-20">{{t 'harbor.project.noData'}}</td></tr>
+  {{/if}}
+{{/sortable-table}}

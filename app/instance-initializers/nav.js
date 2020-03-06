@@ -103,6 +103,25 @@ const rootNav = [
   },
   {
     scope:          'project',
+    id:             'project-harbor',
+    localizedLabel: 'nav.tools.registry',
+    route:          'authenticated.project.harbor.repositories.project',
+    resourceScope:  'global',
+    resource:       [],
+    ctx:            [getProjectId],
+    condition() {
+      const id = get(this, 'clusterId');
+      const cs = get(this, 'globalStore').getById('clustersetting', id);
+
+      if (cs) {
+        return cs.isSetRegistry;
+      }
+
+      return false;
+    }
+  },
+  {
+    scope:          'project',
     id:             'project-tools',
     localizedLabel: 'nav.tools.tab',
     ctx:            [getProjectId],
@@ -215,6 +234,25 @@ const rootNav = [
     resource:       ['clusterroletemplatebinding'],
     resourceScope:  'global',
     ctx:            [getClusterId],
+  },
+  {
+    scope:          'cluster',
+    id:             'cluster-harbor',
+    localizedLabel: 'nav.tools.registry',
+    route:          'authenticated.cluster.harbor.projects',
+    resourceScope:  'global',
+    resource:       [],
+    ctx:            [getClusterId],
+    condition() {
+      const id = get(this, 'clusterId');
+      const cs = get(this, 'globalStore').getById('clustersetting', id);
+
+      if (cs) {
+        return cs.isSetRegistry;
+      }
+
+      return false;
+    }
   },
   {
     scope:          'cluster',

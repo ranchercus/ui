@@ -1,0 +1,58 @@
+{{#if loading}}
+  <i class="icon icon-spinner icon-spin"/> {{t "generic.loading"}}
+{{else}}
+  <section class="header clearfix">
+    <h2>{{t "harbor.tag.header" name=modalOpts.repo}}</h2>
+  </section>
+  {{#sortable-table
+    tableClassNames="double-rows"
+    bulkActions=bulkActions
+    body=repoTags
+    sortBy=sortBy
+    fullRows=true
+    search=search
+    groupByKey=groupByKey
+    groupByRef=groupByRef
+    paging=paging
+    headers=headers as |sortable kind inst dt|
+    }}
+    {{#if (eq kind "row")}}
+      <tr class="main-row">
+        <td class="clip">
+          {{inst.name}}
+        </td>
+        <td class="clip">
+          {{inst.size}}
+        </td>
+        <td class="clip">
+          {{copy-to-clipboard
+            tooltipText=""
+            clipboardText=inst.full_name
+            class="with-clip"
+          }}
+        </td>
+        <td class="clip">
+          {{inst.author}}
+        </td>
+        <td class="clip">
+          {{inst.created}}
+        </td>
+        <td class="clip">
+          {{inst.docker_version}}
+        </td>
+        <td class="clip">
+          {{inst.tag_labels}}
+        </td>
+      </tr>
+    {{else if (eq kind "nomatch")}}
+      <tr><td colspan="{{sortable.fullColspan}}" class="text-center text-muted lacsso pt-20 pb-20">{{t 'harbor.tag.noMatch'}}</td></tr>
+    {{else if (eq kind "norows")}}
+      <tr><td colspan="{{sortable.fullColspan}}" class="text-center text-muted lacsso pt-20 pb-20">{{t 'harbor.tag.noData'}}</td></tr>
+    {{/if}}
+  {{/sortable-table}}
+{{/if}}
+<div class="footer-actions">
+  <button {{action "close"}} class="btn bg-primary">
+    {{t "generic.closeModal"}}
+  </button>
+</div>
